@@ -16,6 +16,8 @@ public class User {
 
     private String username;
 
+    private String fbUsername;
+
     private String email;
 
     private String fbMail;
@@ -86,6 +88,14 @@ public class User {
 
     public void setFbMail(String fbMail) {
         this.fbMail = fbMail;
+    }
+
+    public String getFbUsername() {
+        return fbUsername;
+    }
+
+    public void setFbUsername(String fbUsername) {
+        this.fbUsername = fbUsername;
     }
 }
 
