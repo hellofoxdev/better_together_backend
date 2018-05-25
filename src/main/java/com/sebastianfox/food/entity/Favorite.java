@@ -2,11 +2,7 @@ package com.sebastianfox.food.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import com.sebastianfox.food.entity.User;
-
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity // This tells Hibernate to make a table out of this class
 @Table(name="favorites")

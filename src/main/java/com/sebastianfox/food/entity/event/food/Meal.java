@@ -1,5 +1,6 @@
-package com.sebastianfox.food.entity;
+package com.sebastianfox.food.entity.event.food;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -27,26 +28,15 @@ public class Meal implements Serializable {
     @JoinColumn(name = "meal_type_id")
     private MealType mealType;
 
-    @OneToMany(mappedBy="meal")
+    @OneToMany(mappedBy="meal", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Ingrediant> ingrediants;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "Meal_User",
-            joinColumns = { @JoinColumn(name = "meal_id") },
-            inverseJoinColumns = { @JoinColumn(name = "user_id") }
-    )
-    Set<User> users = new HashSet<>();
 
-    @Column(name="max_participants")
-    private int maxParticipants;
-
-    @Column(name="created_at")
-    private Date createdAt = new Date();
-
-
-    private PhoneType gender;
+    @ManyToOne
+    @JoinColumn(name="food_event_id")
+    @JsonBackReference
+    private FoodEvent foodEvent;
 
     /**
      * constructor
@@ -96,21 +86,5 @@ public class Meal implements Serializable {
 
     public void setMealType(MealType mealType) {
         this.mealType = mealType;
-    }
-
-    public int getMaxParticipants() {
-        return maxParticipants;
-    }
-
-    public void setMaxParticipants(int maxParticipants) {
-        this.maxParticipants = maxParticipants;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
     }
 }

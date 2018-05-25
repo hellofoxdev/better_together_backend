@@ -1,4 +1,4 @@
-package com.sebastianfox.food.Utils;
+package com.sebastianfox.food.utils;
 
 public class MultiAnswer {
     private boolean status;

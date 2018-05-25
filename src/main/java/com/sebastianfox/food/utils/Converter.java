@@ -1,4 +1,4 @@
-package com.sebastianfox.food.Utils;
+package com.sebastianfox.food.utils;
 
 import java.security.MessageDigest;
 

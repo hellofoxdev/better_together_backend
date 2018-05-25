@@ -1,4 +1,4 @@
-package com.sebastianfox.food.entity;
+package com.sebastianfox.food.entity.event.food;
 
 import javax.persistence.*;
 import java.io.Serializable;

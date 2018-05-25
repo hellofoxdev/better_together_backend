@@ -1,26 +1,24 @@
 package com.sebastianfox.food.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sebastianfox.food.entity.event.food.Ingrediant;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="user_id")
     private Integer id;
 
     private String username;
 
-    private String fbUsername;
-
     private String email;
-
-    private String fbMail;
 
     private String session;
 
@@ -29,6 +27,20 @@ public class User {
 
     @JsonIgnore
     private byte[] salt;
+
+    private String fbMail;
+
+    private String fbUsername;
+
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<UserImage> userImages;
+
+    public User(){
+        this.userImages = new ArrayList<>();
+    }
+
+//    getter and setter
 
     public Integer getId() {
         return id;
@@ -96,6 +108,19 @@ public class User {
 
     public void setFbUsername(String fbUsername) {
         this.fbUsername = fbUsername;
+    }
+
+    public List<UserImage> getUserImages() {
+        return userImages;
+    }
+
+    public void setUserImages(List<UserImage> userImages) {
+        this.userImages = userImages;
+    }
+
+    public void addUserImage(UserImage userImage){
+        this.userImages.add(userImage);
+        userImage.setUser(this);
     }
 }
 

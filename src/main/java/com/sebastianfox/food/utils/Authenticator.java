@@ -1,4 +1,4 @@
-package com.sebastianfox.food.Utils;
+package com.sebastianfox.food.utils;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
