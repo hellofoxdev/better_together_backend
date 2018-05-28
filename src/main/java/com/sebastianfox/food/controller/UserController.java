@@ -64,6 +64,9 @@ public class UserController {
         user.addUserImage(userImage);
         user.addUserImage(userImage2);
         userImageRepository.save(userImage);
+
+		SearchFields field = SearchFields.values()[0];
+		System.out.println("Ende");
 	}
 
     /**
@@ -166,15 +169,15 @@ public class UserController {
         FBMAIL
     }
 
-	private MultiAnswer elementExists(HashMap<String, String> receivedData, int seachfieldId) throws JsonProcessingException {
+	private MultiAnswer elementExists(HashMap<String, String> receivedData, SearchFields searchfield) throws JsonProcessingException {
         HashMap<String,HashMap> data = new HashMap<>();
         HashMap<String,Object> hashMap = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         MultiAnswer answer = new MultiAnswer();
         answer.setStatus(false);
         answer.setJsonString("");
-        SearchFields field = SearchFields.values()[seachfieldId];
-        switch (field) {
+
+        switch (searchfield) {
             case USERNAME:
                 if (userRepository.findByUsername(receivedData.get("username")) != null)//noinspection Duplicates
                 {
@@ -239,12 +242,11 @@ public class UserController {
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
-
-        MultiAnswer userCheck = elementExists(registerData, 1);
+        MultiAnswer userCheck = elementExists(registerData, SearchFields.USERNAME);
         if (userCheck.isStatus()){
             return new ResponseEntity<>(userCheck.getJsonString(), HttpStatus.CONFLICT);
         }
-        MultiAnswer emailCheck = elementExists(registerData, 3);
+        MultiAnswer emailCheck = elementExists(registerData, SearchFields.EMAIL);
         if (emailCheck.isStatus()){
             return new ResponseEntity<>(userCheck.getJsonString(), HttpStatus.CONFLICT);
         }
