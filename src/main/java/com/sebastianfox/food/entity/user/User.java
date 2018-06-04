@@ -1,15 +1,16 @@
-package com.sebastianfox.food.entity;
+package com.sebastianfox.food.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sebastianfox.food.entity.event.food.Ingrediant;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Entity // This tells Hibernate to make a table out of this class
+@Table(name="users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,13 +29,17 @@ public class User {
     @JsonIgnore
     private byte[] salt;
 
-    private String fbMail;
+    private String facebookMail;
 
-    private String fbUsername;
+    private String facebookUsername;
+
+    private boolean socialMediaAccount = false;
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<UserImage> userImages;
+
+//    Constructor
 
     public User(){
         this.userImages = new ArrayList<>();
@@ -94,20 +99,20 @@ public class User {
         this.session = session;
     }
 
-    public String getFbMail() {
-        return fbMail;
+    public String getFacebookMail() {
+        return facebookMail;
     }
 
-    public void setFbMail(String fbMail) {
-        this.fbMail = fbMail;
+    public void setFacebookMail(String facebookMail) {
+        this.facebookMail = facebookMail;
     }
 
-    public String getFbUsername() {
-        return fbUsername;
+    public String getFacebookUsername() {
+        return facebookUsername;
     }
 
-    public void setFbUsername(String fbUsername) {
-        this.fbUsername = fbUsername;
+    public void setFacebookUsername(String facebookUsername) {
+        this.facebookUsername = facebookUsername;
     }
 
     public List<UserImage> getUserImages() {
@@ -121,6 +126,14 @@ public class User {
     public void addUserImage(UserImage userImage){
         this.userImages.add(userImage);
         userImage.setUser(this);
+    }
+
+    public boolean isSocialMediaAccount() {
+        return socialMediaAccount;
+    }
+
+    public void setSocialMediaAccount(boolean socialMediaAccount) {
+        this.socialMediaAccount = socialMediaAccount;
     }
 }
 

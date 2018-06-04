@@ -1,7 +1,7 @@
 package com.sebastianfox.food.entity.event.food;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.sebastianfox.food.entity.event.UserEvent;
+import com.sebastianfox.food.entity.event.Event;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name="food_events")
-public class FoodEvent extends UserEvent implements Serializable {
+public class FoodEvent extends Event implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

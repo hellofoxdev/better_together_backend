@@ -1,16 +1,15 @@
 package com.sebastianfox.food.entity.event.movie;
 
-import com.sebastianfox.food.entity.event.UserEvent;
+import com.sebastianfox.food.entity.event.Event;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
-public class MovieEvent extends UserEvent {
+@Table(name="movie_events")
+public class MovieEvent extends Event {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="movie_event_id")
     private Integer id;
 
     private String title;

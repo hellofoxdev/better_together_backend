@@ -2,7 +2,7 @@ package com.sebastianfox.food.utils;
 
 import java.security.MessageDigest;
 
-public class Converter {
+public class Sha256Converter {
 
     public String getSha256(String base) {
         try{

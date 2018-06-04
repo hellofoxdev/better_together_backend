@@ -1,7 +1,12 @@
 package com.sebastianfox.food.repository;
 
+import com.sebastianfox.food.entity.event.Event;
 import com.sebastianfox.food.entity.user.User;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import java.awt.print.Book;
 
 //import hello.User;
 
@@ -11,13 +16,8 @@ import org.springframework.data.repository.CrudRepository;
 // This will be AUTO IMPLEMENTED by Spring into a Bean called userRepository
 // CRUD refers Create, Read, Update, Delete
 
-public interface UserRepository extends CrudRepository<User, Long> {
-    //List<User> findByEmail(String email);
-    User findByEmail(String email);
+public interface EventRepository extends CrudRepository<Event, Long> {
 
-    User findByUsername(String name);
+    Event findByOrgUser(User user);
 
-    User findByFacebookMail(String mail);
-
-    User findByFacebookUsername(String name);
 }

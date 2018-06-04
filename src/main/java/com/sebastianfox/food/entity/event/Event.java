@@ -1,14 +1,16 @@
 package com.sebastianfox.food.entity.event;
 
-import com.sebastianfox.food.entity.User;
+import com.sebastianfox.food.entity.user.User;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-public class UserEvent {
+@Table(name="user_events")
+public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="user_event_id")
     private Integer id;
 
     private String name;
@@ -27,7 +29,13 @@ public class UserEvent {
 
     private Integer maxParticipants;
 
-//    Getter and Setter
+    //
+
+    public String getUserSession() {
+        return orgUser.getSession();
+    }
+
+    //   Getter and Setter
 
     public Integer getId() {
         return id;

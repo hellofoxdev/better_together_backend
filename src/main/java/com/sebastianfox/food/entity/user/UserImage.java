@@ -1,12 +1,9 @@
-package com.sebastianfox.food.entity;
+package com.sebastianfox.food.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.sebastianfox.food.entity.event.food.Meal;
-import com.sebastianfox.food.entity.event.food.MealType;
+import com.sebastianfox.food.entity.user.User;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.List;
 
 @Entity
 @Table(name="user_images")
