@@ -1,11 +1,9 @@
 package com.sebastianfox.food.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sebastianfox.food.entity.event.Event;
 import com.sebastianfox.food.entity.user.UserImage;
 import com.sebastianfox.food.entity.event.food.FoodEvent;
 import com.sebastianfox.food.repository.EventRepository;
-import com.sebastianfox.food.repository.UserImageRepository;
 import com.sebastianfox.food.utils.Authenticator;
 import com.sebastianfox.food.entity.event.movie.MovieEvent;
 import com.sebastianfox.food.entity.user.User;
@@ -35,7 +33,7 @@ public class UserController {
 
 	private final UserRepository userRepository;
 	private final EventRepository eventRepository;
-	Sha256Converter sessionGenerator = new Sha256Converter();
+	private Sha256Converter sessionGenerator = new Sha256Converter();
 
 	private Authenticator authenticator = new Authenticator();
 
