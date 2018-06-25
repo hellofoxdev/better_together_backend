@@ -35,6 +35,20 @@ public class User {
 
     private boolean socialMediaAccount = false;
 
+    @ManyToMany
+    @JoinTable(name="favorites",
+            joinColumns=@JoinColumn(name="userId"),
+            inverseJoinColumns=@JoinColumn(name="favoriteId")
+    )
+    private List<User> friends;
+
+    @ManyToMany
+    @JoinTable(name="favorites",
+            joinColumns=@JoinColumn(name="favoriteId"),
+            inverseJoinColumns=@JoinColumn(name="userId")
+    )
+    private List<User> friendOf;
+
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<UserImage> userImages;
@@ -43,6 +57,8 @@ public class User {
 
     public User(){
         this.userImages = new ArrayList<>();
+        this.friendOf = new ArrayList<>();
+        this.friends = new ArrayList<>();
     }
 
 //    getter and setter
@@ -134,6 +150,17 @@ public class User {
 
     public void setSocialMediaAccount(boolean socialMediaAccount) {
         this.socialMediaAccount = socialMediaAccount;
+    }
+
+   /* public void addFriendOf(User user){
+        user.friendOf.add(this);
+        this.addFriend(user);
+    }*/
+
+    public void addFriend(User friend){
+        this.friends.add(friend);
+       // friend.addFriendOf(this);
+        //userImage.setUser(this);
     }
 }
 

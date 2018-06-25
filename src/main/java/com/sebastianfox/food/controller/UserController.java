@@ -81,6 +81,18 @@ public class UserController {
         userImage.setName("Mein Profilbild");
         user.addUserImage(userImage);
         userRepository.save(user);
+
+        User user2 = new User();
+        user2.setEmail("sebastian.fox@icloud.com");
+        user2.setUsername("basti12");
+        user2.setSalt(authenticator.getNextSalt());
+        user2.setPassword(authenticator.hash("password".toCharArray(), user2.getSalt()));
+        userRepository.save(user2);
+        user2.setSession(sessionGenerator.getSha256(user2.getId().toString()));
+        userRepository.save(user2);
+
+        user.addFriend(user2);
+        userRepository.save(user);
 	}
 
 	/**
