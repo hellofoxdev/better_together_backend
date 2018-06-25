@@ -162,6 +162,10 @@ public class User {
        // friend.addFriendOf(this);
         //userImage.setUser(this);
     }
+
+    public List<User> getFriends() {
+        return friends;
+    }
 }
 
 

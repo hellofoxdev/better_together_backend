@@ -259,6 +259,43 @@ public class UserController {
 	}
 
 	/**
+	 *
+	 * @param userData JSON data from App
+	 * @return http response
+	 * @throws JSONException exception
+	 * @throws IOException exception
+	 */
+	@RequestMapping(path = "/getFriends", method = RequestMethod.POST, consumes = {"application/json"})
+	public ResponseEntity<Object> getFriends(@RequestBody HashMap<String, String> userData) throws JSONException, IOException {
+		User user = userRepository.findByUsername(userData.get("username"));
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String,HashMap> data = new HashMap<>();
+		HashMap<String,Object> hashMap = new HashMap<>();
+		//JSON from String to Object
+		User user2 = mapper.readValue(userData.get("user"), User.class);
+
+		// Failure at login (user not found or bad credentials)
+		if (user == null) {
+			hashMap.put("status", FAILURE);
+			hashMap.put("message", BADCREDENTIALS);
+			data.put("data", hashMap);
+			// Object to JSON String
+			String jsonString = mapper.writeValueAsString(data);
+			// Return to App
+			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
+		}
+
+		// Successful login
+		hashMap.put("status","success");
+		hashMap.put("friends",user.getFriends());
+		data.put("data", hashMap);
+		// Object to JSON String
+		String jsonString = mapper.writeValueAsString(data);
+		// Return to App
+		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+	}
+
+	/**
 	 * @param username JSON data from App
 	 * @return http response
 	 * @throws JSONException exception
