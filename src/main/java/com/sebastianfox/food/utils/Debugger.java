@@ -6,8 +6,10 @@ public class Debugger{
 
     private boolean isEnabled = true;
 
-    public static void log(Object o){
-        System.out.println("DEBUG: " + o.toString());
+    public static void log(Object o) {
+        if (o != null) {
+            System.out.println("DEBUG: " + o.toString());
+        }
     }
 
     public Integer getLevel() {

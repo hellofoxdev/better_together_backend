@@ -253,7 +253,6 @@ public class UserController {
 	@SuppressWarnings("Duplicates")
 	@RequestMapping(path = "/facebookLogin", method = RequestMethod.POST, consumes = {"application/json"})
 	public ResponseEntity<Object> facebookLogin(@RequestBody HashMap<String, String> loginData) throws JSONException, IOException {
-		System.out.println("erster TEST");
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
@@ -271,14 +270,12 @@ public class UserController {
 
 			user.setSocialMediaAccount(true);
 
-			//userRepository.save(user);
+			userRepository.save(user);
 
 
-			Debugger.log(userRepository.save(user));
+			Debugger.log("User saved");
 			hashMap.put("status", SUCCESS);
-			System.out.println("DEBUG: Status success");
 			hashMap.put("message", FACEBOOKUSERCREATED);
-			System.out.println("DEBUG: Message CREATED");
 			hashMap.put("user", user);
 			data.put("data", hashMap);
 			// Object to JSON String
