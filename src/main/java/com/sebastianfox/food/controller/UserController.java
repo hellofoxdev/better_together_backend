@@ -8,6 +8,7 @@ import com.sebastianfox.food.utils.Authenticator;
 import com.sebastianfox.food.entity.event.movie.MovieEvent;
 import com.sebastianfox.food.entity.user.User;
 import com.sebastianfox.food.repository.UserRepository;
+import com.sebastianfox.food.utils.Debugger;
 import com.sebastianfox.food.utils.Sha256Converter;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,8 +205,6 @@ public class UserController {
 	@SuppressWarnings("Duplicates")
 	@RequestMapping(path = "/registerUser", method = RequestMethod.POST, consumes = {"application/json"})
 	public ResponseEntity<Object> registerUser(@RequestBody HashMap<String, String> registerData) throws JSONException, IOException {
-
-		System.out.println("erster TEST");
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
@@ -260,21 +259,22 @@ public class UserController {
 		HashMap<String,Object> hashMap = new HashMap<>();
 		User facebookUser = userRepository.findByFacebookMail(loginData.get("facebookMail"));
 		if (facebookUser == null){
-
-			System.out.println("DEBUG: Facebook User == null");
+			Debugger.log(facebookUser);
 			// Create and safe new user
 			User user = new User();
 			user.setUsername(loginData.get("facebookMail"));
-			System.out.println("DEBUG: Facebook Mail für Username: " + loginData.get("facebookMail"));
+			Debugger.log(loginData.get("facebookMail") + "for Username");
 			user.setEmail(loginData.get("facebookMail"));
-			System.out.println("DEBUG: Facebook Mail für Mail: " + loginData.get("facebookMail"));
+			Debugger.log(loginData.get("facebookMail") + "for Email");
 			user.setFacebookMail(loginData.get("facebookMail"));
+			Debugger.log(loginData.get("facebookMail") + "for Facebookmail");
 
 			user.setSocialMediaAccount(true);
 
-			userRepository.save(user);
+			//userRepository.save(user);
 
-			System.out.println("DEBUG: User saved");
+
+			Debugger.log(userRepository.save(user));
 			hashMap.put("status", SUCCESS);
 			System.out.println("DEBUG: Status success");
 			hashMap.put("message", FACEBOOKUSERCREATED);
