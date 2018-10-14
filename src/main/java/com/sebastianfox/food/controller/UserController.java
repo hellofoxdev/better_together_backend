@@ -252,6 +252,7 @@ public class UserController {
 	@SuppressWarnings("Duplicates")
 	@RequestMapping(path = "/facebookLogin", method = RequestMethod.POST, consumes = {"application/json"})
 	public ResponseEntity<Object> facebookLogin(@RequestBody HashMap<String, String> loginData) throws JSONException, IOException {
+		System.out.println("erster TEST");
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
