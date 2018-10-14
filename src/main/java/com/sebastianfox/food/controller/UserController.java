@@ -204,6 +204,8 @@ public class UserController {
 	@SuppressWarnings("Duplicates")
 	@RequestMapping(path = "/registerUser", method = RequestMethod.POST, consumes = {"application/json"})
 	public ResponseEntity<Object> registerUser(@RequestBody HashMap<String, String> registerData) throws JSONException, IOException {
+
+		System.out.println("erster TEST");
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
