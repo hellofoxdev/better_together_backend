@@ -257,20 +257,31 @@ public class UserController {
 		HashMap<String,Object> hashMap = new HashMap<>();
 		User facebookUser = userRepository.findByFacebookMail(loginData.get("facebookMail"));
 		if (facebookUser == null){
+
+			System.out.println("DEBUG: Facebook User == null");
 			// Create and safe new user
 			User user = new User();
 			user.setUsername(loginData.get("facebookMail"));
+			System.out.println("DEBUG: Facebook Mail für Username: " + loginData.get("facebookMail"));
 			user.setEmail(loginData.get("facebookMail"));
+			System.out.println("DEBUG: Facebook Mail für Mail: " + loginData.get("facebookMail"));
 			user.setFacebookMail(loginData.get("facebookMail"));
+
 			user.setSocialMediaAccount(true);
+
 			userRepository.save(user);
 
+			System.out.println("DEBUG: User saved");
 			hashMap.put("status", SUCCESS);
+			System.out.println("DEBUG: Status success");
 			hashMap.put("message", FACEBOOKUSERCREATED);
+			System.out.println("DEBUG: Message CREATED");
 			hashMap.put("user", user);
 			data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(data);
+
+			System.out.println("DEBUG: JSON String" + jsonString);
             return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
         }
 
