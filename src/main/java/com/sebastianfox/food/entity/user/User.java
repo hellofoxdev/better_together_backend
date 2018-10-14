@@ -37,15 +37,15 @@ public class User {
 
     @ManyToMany
     @JoinTable(name="favorites",
-            joinColumns=@JoinColumn(name="userId"),
-            inverseJoinColumns=@JoinColumn(name="favoriteId")
+            joinColumns=@JoinColumn(name="userFriendId"),
+            inverseJoinColumns=@JoinColumn(name="userFavoriteId")
     )
     private List<User> friends;
 
     @ManyToMany
     @JoinTable(name="favorites",
-            joinColumns=@JoinColumn(name="favoriteId"),
-            inverseJoinColumns=@JoinColumn(name="userId")
+            joinColumns=@JoinColumn(name="userFavoriteId"),
+            inverseJoinColumns=@JoinColumn(name="userFriendId")
     )
     private List<User> friendOf;
 

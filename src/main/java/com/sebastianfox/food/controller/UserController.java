@@ -23,9 +23,9 @@ import java.util.HashMap;
 @Controller    // This means that this class is a Controller
 @RequestMapping(path = "/api/user") // This means URL's start with /api (after Application path)
 public class UserController {
-	private static final String USERNAMENOTAVAILABLE = "Username bereits registriert";
+	private static final String USERNAMENOTAVAILABLE = "Benutzername bereits registriert";
 	private static final String USERNOTFOUND = "User in nicht gefunden";
-	private static final String EMAILNOTAVAILABLE = "Email bereits registriert";
+	private static final String EMAILNOTAVAILABLE = "Email Adresse bereits registriert";
 	private static final String FACEBOOKUSERCREATED = "Facebook User wurde angelegt";
 	private static final String BADCREDENTIALS = "Username oder Passwort falsch";
 	private static final String FAILURE = "failure";
@@ -122,6 +122,7 @@ public class UserController {
 		hashMap.put("session",user.getId().toString());
 		hashMap.put("status","success");
 		hashMap.put("user",user);
+		hashMap.put("favorites", user.getFriends());
 		data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(data);
@@ -137,8 +138,8 @@ public class UserController {
 	 * @throws IOException exception
 	 */
 	@SuppressWarnings("Duplicates")
-	@RequestMapping(path = "/checkAvailability", method = RequestMethod.POST, consumes = {"application/json"})
-	public ResponseEntity<Object> checkAvailability(@RequestBody HashMap<String, String> registerData) throws JSONException, IOException {
+	@RequestMapping(path = "/checkUsername", method = RequestMethod.POST, consumes = {"application/json"})
+	public ResponseEntity<Object> checkUsername(@RequestBody HashMap<String, String> registerData) throws JSONException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
@@ -151,6 +152,30 @@ public class UserController {
 			String jsonString = mapper.writeValueAsString(data);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
+
+		// Successful register
+		hashMap.put("status","success");
+		data.put("data", hashMap);
+		// Object to JSON String
+		String jsonString = mapper.writeValueAsString(data);
+		// Return to App
+		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+	}
+
+	/**
+	 *
+	 * @param registerData JSON data from App
+	 * @return http response
+	 * @throws JSONException exception
+	 * @throws IOException exception
+	 */
+	@SuppressWarnings("Duplicates")
+	@RequestMapping(path = "/checkMail", method = RequestMethod.POST, consumes = {"application/json"})
+	public ResponseEntity<Object> checkMail(@RequestBody HashMap<String, String> registerData) throws JSONException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String,HashMap> data = new HashMap<>();
+		HashMap<String,Object> hashMap = new HashMap<>();
+
 		if (userRepository.findByEmail(registerData.get("mail")) != null){
 			hashMap.put("status", FAILURE);
 			hashMap.put("message", EMAILNOTAVAILABLE);
@@ -209,6 +234,7 @@ public class UserController {
 
 		// Successful register
 		hashMap.put("status","success");
+		hashMap.put("user", user);
 		data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(data);
@@ -265,6 +291,7 @@ public class UserController {
 	 * @throws JSONException exception
 	 * @throws IOException exception
 	 */
+	/*
 	@RequestMapping(path = "/getFriends", method = RequestMethod.POST, consumes = {"application/json"})
 	public ResponseEntity<Object> getFriends(@RequestBody HashMap<String, String> userData) throws JSONException, IOException {
 		User user = userRepository.findByUsername(userData.get("username"));
@@ -293,7 +320,7 @@ public class UserController {
 		String jsonString = mapper.writeValueAsString(data);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
-	}
+	}*/
 
 	/**
 	 * @param username JSON data from App
