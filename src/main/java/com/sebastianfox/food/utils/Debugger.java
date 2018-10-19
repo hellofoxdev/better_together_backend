@@ -8,7 +8,7 @@ public class Debugger{
 
     public static void log(Object o) {
         if (o != null) {
-            System.out.println("DEBUG: " + o.toString());
+            System.out.println("DEBUG (log): " + o.toString());
         }
     }
 

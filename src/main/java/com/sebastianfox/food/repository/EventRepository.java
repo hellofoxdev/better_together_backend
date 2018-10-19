@@ -2,7 +2,7 @@ package com.sebastianfox.food.repository;
 
 import com.sebastianfox.food.entity.event.Event;
 import com.sebastianfox.food.entity.user.User;
-import org.springframework.data.jpa.repository.Query;
+import javax.persistence.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
