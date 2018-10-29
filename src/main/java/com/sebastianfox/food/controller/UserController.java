@@ -103,7 +103,7 @@ public class UserController {
 	 */
     @RequestMapping(path = "/authenticate", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> authenticate(@RequestBody HashMap<String, String> loginData) throws JSONException, IOException {
-		User user = userRepository.findByUsername(loginData.get("username"));
+		User user = userRepository.findByEmail(loginData.get("email"));
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
