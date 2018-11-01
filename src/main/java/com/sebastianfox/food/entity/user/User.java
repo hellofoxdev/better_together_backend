@@ -57,7 +57,7 @@ public class User {
     @JsonManagedReference
     private List<UserImage> userImages;
 
-//    Constructor
+    //  Constructor
 
     public User(){
         this.userImages = new ArrayList<>();
@@ -65,7 +65,23 @@ public class User {
         this.friends = new ArrayList<>();
     }
 
-//    getter and setter
+    //  functions
+
+    /**
+     *
+     *
+     * @param appUser data transformed as user from app
+     * @return user with new data with data from app
+     */
+    public User mergeDataFromApp(User appUser) {
+        this.username = appUser.username;
+        this.email = appUser.email;
+        this.lastname = appUser.lastname;
+        this.firstname = appUser.firstname;
+        return this;
+    }
+
+    //  getter and setter
 
     public Integer getId() {
         return id;

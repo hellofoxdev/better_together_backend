@@ -115,6 +115,7 @@ public class UserController {
 			data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(data);
+			//User testUSer = mapper.readValue(jsonString, User.class);
 			// Return to App
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
@@ -124,6 +125,45 @@ public class UserController {
 		hashMap.put("status","success");
 		hashMap.put("user",user);
 		hashMap.put("favorites", user.getFriends());
+		data.put("data", hashMap);
+		// Object to JSON String
+		String jsonString = mapper.writeValueAsString(data);
+		// Return to App
+		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+	}
+
+	/**
+	 *
+	 * @param userData JSON data from App
+	 * @return http response
+	 * @throws JSONException exception
+	 * @throws IOException exception
+	 */
+	@SuppressWarnings("Duplicates")
+	@RequestMapping(path = "/updateUser", method = RequestMethod.POST, consumes = {"application/json"})
+	public ResponseEntity<Object> updateUser(@RequestBody HashMap<String, User> userData) throws JSONException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String,HashMap> data = new HashMap<>();
+		HashMap<String,Object> hashMap = new HashMap<>();
+		User appUser = userData.get("user");
+		User user = userRepository.findById(appUser.getId());
+		user.mergeDataFromApp(appUser);
+		userRepository.save(user);
+
+
+		//userRepository.save(user);
+
+//		if (userRepository.findByUsername(registerData.get("username")) != null){
+//			hashMap.put("status", FAILURE);
+//			hashMap.put("message", USERNAMENOTAVAILABLE);
+//			data.put("data", hashMap);
+//			// Object to JSON String
+//			String jsonString = mapper.writeValueAsString(data);
+//			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
+//		}
+
+		// Successful register
+		hashMap.put("status","success");
 		data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(data);
