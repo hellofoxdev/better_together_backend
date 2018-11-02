@@ -164,6 +164,7 @@ public class UserController {
 
 		// Successful register
 		hashMap.put("status","success");
+		hashMap.put("user",user);
 		data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(data);
