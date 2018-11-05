@@ -3,6 +3,7 @@ package com.sebastianfox.food.entity.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sebastianfox.food.entity.event.Event;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -39,6 +40,17 @@ public class User {
 
     private boolean socialMediaAccount = false;
 
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
+    @JoinTable(name="users_events",
+            joinColumns=@JoinColumn(name="eventId"),
+            inverseJoinColumns=@JoinColumn(name="userId")
+    )
+    private List<Event> events;
+
     @ManyToMany
     @JoinTable(name="favorites",
             joinColumns=@JoinColumn(name="userFriendId"),
@@ -63,6 +75,7 @@ public class User {
         this.userImages = new ArrayList<>();
         this.friendOf = new ArrayList<>();
         this.friends = new ArrayList<>();
+        this.events = new ArrayList<>();
     }
 
     //  functions
@@ -201,6 +214,16 @@ public class User {
 
     public List<User> getFriends() {
         return friends;
+    }
+
+    public void addEvent(Event event){
+        this.events.add(event);
+        // friend.addFriendOf(this);
+        //userImage.setUser(this);
+    }
+
+    public List<Event> getEvents() {
+        return events;
     }
 }
 

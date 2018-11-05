@@ -1,6 +1,7 @@
 package com.sebastianfox.food.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sebastianfox.food.entity.event.Event;
 import com.sebastianfox.food.entity.user.UserImage;
 import com.sebastianfox.food.entity.event.food.FoodEvent;
 import com.sebastianfox.food.repository.EventRepository;
@@ -60,7 +61,7 @@ public class UserController {
 	@GetMapping(path = "/test")
     public void testFunction(){
 		MovieEvent movie = new MovieEvent();
-		movie.setTitle("Rush Hour");
+		movie.setMovieTitle("Rush Hour");
         eventRepository.save(movie);
 
 		FoodEvent food = new FoodEvent();
@@ -149,6 +150,15 @@ public class UserController {
 		User user = userRepository.findById(appUser.getId());
 		user.mergeDataFromApp(appUser);
 		userRepository.save(user);
+
+		Event event = new Event();
+		event.setTitle("Test");
+		eventRepository.save(event);
+
+		user.addEvent(event);
+		userRepository.save(user);
+
+
 
 
 		//userRepository.save(user);

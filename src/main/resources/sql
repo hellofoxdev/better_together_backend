@@ -1,0 +1,7 @@
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('gender','gender','Geschlecht');
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('birthday','birthday','Geburtstag');
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('email','email','Email');
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('fullName','full name','vollständiger Name');
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('username','username','Benutzername');
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('website','website','Website');
+INSERT INTO `messages`(`identifier`, `msg_english`, `msg_german`) VALUES ('profileData','profile data','Profil Daten');

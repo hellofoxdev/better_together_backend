@@ -4,16 +4,18 @@ import com.sebastianfox.food.entity.user.User;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name="user_events")
+@Table(name="events")
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="user_event_id")
     private Integer id;
 
-    private String name;
+    private String title;
 
     private String location;
 
@@ -29,11 +31,14 @@ public class Event {
 
     private Integer maxParticipants;
 
-    //
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "events")
+    private Set<User> users = new HashSet<>();
 
-    public String getUserSession() {
-        return orgUser.getSession();
-    }
 
     //   Getter and Setter
 
@@ -45,12 +50,12 @@ public class Event {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getLocation() {
@@ -67,14 +72,6 @@ public class Event {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public User getOrgUser() {
-        return orgUser;
-    }
-
-    public void setOrgUser(User orgUser) {
-        this.orgUser = orgUser;
     }
 
     public String getDescription() {

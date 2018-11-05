@@ -1,5 +1,9 @@
 package com.sebastianfox.food.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 
 @SuppressWarnings("unused")
@@ -13,16 +17,20 @@ public class Message {
 
     private String identifier;
 
+    @JsonIgnore
     private String msgGerman;
 
+    @JsonIgnore
     private String msgEnglish;
 
-    public String getMsgByLanguage(String language) {
-        if (language.toUpperCase().equals("GERMAN")) {
-            return msgGerman;
+    private String text = "";
+
+    public void setTextByLanguage(String language) {
+        if (language.toUpperCase().equals("FR")) {
+            this.setText(msgGerman);
         }
         else {
-            return msgEnglish;
+            this.setText(msgEnglish);
         }
     }
 
@@ -60,5 +68,13 @@ public class Message {
 
     public void setMsgEnglish(String msgEnglish) {
         this.msgEnglish = msgEnglish;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

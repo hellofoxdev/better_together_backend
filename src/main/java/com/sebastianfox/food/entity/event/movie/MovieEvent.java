@@ -12,7 +12,7 @@ public class MovieEvent extends Event {
     @Column(name="movie_event_id")
     private Integer id;
 
-    private String title;
+    private String movieTitle;
 
     private String genre;
 
@@ -24,12 +24,12 @@ public class MovieEvent extends Event {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getMovieTitle() {
+        return movieTitle;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setMovieTitle(String movieTitle) {
+        this.movieTitle = movieTitle;
     }
 
     public String getGenre() {
