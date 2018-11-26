@@ -1,5 +1,7 @@
 package com.sebastianfox.food.entity.event;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sebastianfox.food.entity.user.User;
 
 import javax.persistence.*;
@@ -12,7 +14,7 @@ import java.util.Set;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="user_event_id")
+    @Column(name="event_id")
     private Integer id;
 
     private String title;
@@ -23,9 +25,10 @@ public class Event {
 
     private boolean publicEvent = false;
 
-    @OneToOne
-    @JoinColumn(name = "org_user_id")
-    private User orgUser;
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable=false)
+    @JsonIgnoreProperties({"events", "ownedEvents"})
+    private User owner;
 
     private String description;
 
@@ -37,7 +40,8 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    private Set<User> users = new HashSet<>();
+    @JsonIgnoreProperties({"events", "ownedEvents"})
+    private Set<User> members = new HashSet<>();
 
 
     //   Getter and Setter
@@ -96,5 +100,31 @@ public class Event {
 
     public void setPublicEvent(boolean publicEvent) {
         this.publicEvent = publicEvent;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+        if (!owner.getOwnedEvents().contains(this)){
+            owner.addOwnedEvent(this);
+        }
+    }
+
+    public Set<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(Set<User> members) {
+        this.members = members;
+    }
+
+    public void addMember(User member) {
+        this.members.add(member);
+        if (!member.getEvents().contains(this)) {
+            member.addEvent(this);
+        }
     }
 }

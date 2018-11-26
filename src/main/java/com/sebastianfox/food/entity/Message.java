@@ -1,5 +1,6 @@
 package com.sebastianfox.food.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,11 +27,11 @@ public class Message {
     private String text = "";
 
     public void setTextByLanguage(String language) {
-        if (language.toUpperCase().equals("FR")) {
+        if (language.toUpperCase().equals("DE")) {
             this.setText(msgGerman);
         }
         else {
-            this.setText(msgEnglish);
+            this.setText(msgGerman);
         }
     }
 

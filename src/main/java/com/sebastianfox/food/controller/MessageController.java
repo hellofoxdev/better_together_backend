@@ -40,7 +40,6 @@ public class MessageController {
     @RequestMapping(path = "/loadMessages", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> authenticate(@RequestBody HashMap<String, String> localeData) throws JSONException, IOException {
 
-
         Iterable<Message> messages = messageRepository.findAll();
         for (Message message : messages) {
             message.setTextByLanguage(localeData.get("locale"));
@@ -55,7 +54,7 @@ public class MessageController {
         hashMap.put("messages",messages);
         data.put("data", hashMap);
         // Object to JSON String
-        String jsonString = mapper.writeValueAsString(data);
+        String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
         return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
     }

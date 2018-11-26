@@ -115,7 +115,7 @@ public class UserController {
 			hashMap.put("message", BADCREDENTIALS);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			//User testUSer = mapper.readValue(jsonString, User.class);
 			// Return to App
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
@@ -128,7 +128,45 @@ public class UserController {
 		hashMap.put("favorites", user.getFriends());
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
+		// Return to App
+		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+	}
+
+	/**
+	 *
+	 * @param userData JSON data from App
+	 * @return http response
+	 * @throws JSONException exception
+	 * @throws IOException exception
+	 */
+	@SuppressWarnings("Duplicates")
+	@RequestMapping(path = "/reloadUser", method = RequestMethod.POST, consumes = {"application/json"})
+	public ResponseEntity<Object> reloadUser(@RequestBody HashMap<String, User> userData) throws JSONException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String,HashMap> data = new HashMap<>();
+		HashMap<String,Object> hashMap = new HashMap<>();
+		User appUser = userData.get("user");
+
+		// check if user is available in database
+		if (userRepository.findById(appUser.getId()) == null){
+			hashMap.put("status", FAILURE);
+			hashMap.put("message", USERNOTFOUND);
+			//data.put("data", hashMap);
+			// Object to JSON String
+			String jsonString = mapper.writeValueAsString(hashMap);
+			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
+		}
+		
+		
+		User user = userRepository.findById(appUser.getId());
+
+		// Successful register
+		hashMap.put("status","success");
+		hashMap.put("user",user);
+		//data.put("data", hashMap);
+		// Object to JSON String
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -151,33 +189,12 @@ public class UserController {
 		user.mergeDataFromApp(appUser);
 		userRepository.save(user);
 
-		Event event = new Event();
-		event.setTitle("Test");
-		eventRepository.save(event);
-
-		user.addEvent(event);
-		userRepository.save(user);
-
-
-
-
-		//userRepository.save(user);
-
-//		if (userRepository.findByUsername(registerData.get("username")) != null){
-//			hashMap.put("status", FAILURE);
-//			hashMap.put("message", USERNAMENOTAVAILABLE);
-//			data.put("data", hashMap);
-//			// Object to JSON String
-//			String jsonString = mapper.writeValueAsString(data);
-//			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
-//		}
-
 		// Successful register
 		hashMap.put("status","success");
 		hashMap.put("user",user);
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -201,7 +218,7 @@ public class UserController {
 			hashMap.put("message", USERNAMENOTAVAILABLE);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
 
@@ -209,7 +226,7 @@ public class UserController {
 		hashMap.put("status","success");
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -233,7 +250,7 @@ public class UserController {
 			hashMap.put("message", EMAILNOTAVAILABLE);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
 
@@ -241,7 +258,7 @@ public class UserController {
 		hashMap.put("status","success");
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -265,7 +282,7 @@ public class UserController {
 			hashMap.put("message", USERNAMENOTAVAILABLE);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
 		if (userRepository.findByEmail(registerData.get("mail")) != null){
@@ -273,7 +290,7 @@ public class UserController {
 			hashMap.put("message", EMAILNOTAVAILABLE);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
 		// Create and safe new user
@@ -289,7 +306,7 @@ public class UserController {
 		hashMap.put("user", user);
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -330,7 +347,7 @@ public class UserController {
 			hashMap.put("user", user);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 
 			System.out.println("DEBUG: JSON String" + jsonString);
             return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
@@ -341,7 +358,7 @@ public class UserController {
 		hashMap.put("user", facebookUser);
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -369,7 +386,7 @@ public class UserController {
 			hashMap.put("message", BADCREDENTIALS);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			// Return to App
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
@@ -379,7 +396,7 @@ public class UserController {
 		hashMap.put("friends",user.getFriends());
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}*/
@@ -403,7 +420,7 @@ public class UserController {
 			hashMap.put("message", USERNOTFOUND);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			// Return to App
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
@@ -413,7 +430,7 @@ public class UserController {
 		hashMap.put("user",user);
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
@@ -438,7 +455,7 @@ public class UserController {
 			hashMap.put("message", USERNOTFOUND);
 			data.put("data", hashMap);
 			// Object to JSON String
-			String jsonString = mapper.writeValueAsString(data);
+			String jsonString = mapper.writeValueAsString(hashMap);
 			// Return to App
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
 		}
@@ -448,7 +465,7 @@ public class UserController {
 		hashMap.put("user",user);
 		data.put("data", hashMap);
 		// Object to JSON String
-		String jsonString = mapper.writeValueAsString(data);
+		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}

@@ -1,6 +1,7 @@
 package com.sebastianfox.food.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sebastianfox.food.entity.event.Event;
@@ -46,10 +47,15 @@ public class User {
                     CascadeType.MERGE
             })
     @JoinTable(name="users_events",
-            joinColumns=@JoinColumn(name="eventId"),
-            inverseJoinColumns=@JoinColumn(name="userId")
+            joinColumns=@JoinColumn(name="userId"),
+            inverseJoinColumns=@JoinColumn(name="eventId")
     )
+    @JsonIgnoreProperties({"owner", "members"})
     private List<Event> events;
+
+    @OneToMany(mappedBy="owner")
+    @JsonIgnoreProperties({"owner", "members"})
+    private List<Event> ownedEvents;
 
     @ManyToMany
     @JoinTable(name="favorites",
@@ -218,12 +224,29 @@ public class User {
 
     public void addEvent(Event event){
         this.events.add(event);
-        // friend.addFriendOf(this);
-        //userImage.setUser(this);
+        if (!event.getMembers().contains(this)){
+            event.addMember(this);
+        }
     }
 
     public List<Event> getEvents() {
         return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
+
+    public List<Event> getOwnedEvents() {
+        return ownedEvents;
+    }
+
+    public void setOwnedEvents(List<Event> ownedEvents) {
+        this.ownedEvents = ownedEvents;
+    }
+
+    public void addOwnedEvent(Event ownedEvent) {
+        this.ownedEvents.add(ownedEvent);
     }
 }
 

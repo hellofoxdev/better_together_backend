@@ -18,6 +18,8 @@ import java.awt.print.Book;
 
 public interface EventRepository extends CrudRepository<Event, Long> {
 
-    Event findByOrgUser(User user);
+    Event findByOwner(User user);
+
+    Event findById(Integer id);
 
 }
