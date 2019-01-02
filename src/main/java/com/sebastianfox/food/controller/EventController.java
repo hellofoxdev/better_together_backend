@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class EventController {
     private static final String USERNAMENOTAVAILABLE = "Benutzername bereits registriert";
     private static final String USERNOTFOUND = "User in nicht gefunden";
-    private static final String EMAILNOTAVAILABLE = "Email Adresse bereits registriert";
+    private static final String EMAILNOTAVAILABLEEMAILNOTAVAILABLE = "Email Adresse bereits registriert";
     private static final String FACEBOOKUSERCREATED = "Facebook User wurde angelegt";
     private static final String BADCREDENTIALS = "Username oder Passwort falsch";
     private static final String FAILURE = "failure";
@@ -76,6 +76,57 @@ public class EventController {
 
     /**
      *
+     * @param userData JSON data from App
+     * @return http response
+     * @throws JSONException exception
+     * @throws IOException exception
+     */
+
+    /**
+     *
+     * @param userData JSON data from App
+     * @return http response
+     * @throws JSONException exception
+     * @throws IOException exception
+     */
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(path = "/loadUserEvents", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> loadUserEvents(@RequestBody HashMap<String, String> userData) throws JSONException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        HashMap<String,HashMap> data = new HashMap<>();
+        HashMap<String,Object> hashMap = new HashMap<>();
+        User appUser = userRepository.findByEmail(userData.get("mail"));
+
+        //User appUser = userData.get("user");
+
+       // User appUser = userRepository.findByEmail(userData.get("email"));
+
+        // check if user is available in database
+        if (appUser != null && userRepository.findById(appUser.getId()) == null) {
+            hashMap.put("status", FAILURE);
+            hashMap.put("message", USERNOTFOUND);
+            String jsonString = mapper.writeValueAsString(hashMap);
+            return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
+        }
+
+
+        Iterable<Event> events = eventRepository.findByOwner(appUser);
+        for (Event event : events) {
+            System.out.print(event.getTitle());
+        }
+
+        // Successful login
+        hashMap.put("status","success");
+        hashMap.put("events",events);
+        data.put("data", hashMap);
+        // Object to JSON String
+        String jsonString = mapper.writeValueAsString(hashMap);
+        // Return to App
+        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+    }
+
+    /**
+     *
      * @param eventData JSON data from App
      * @return http response
      * @throws JSONException exception
@@ -90,7 +141,7 @@ public class EventController {
 
         if (userRepository.findByEmail(eventData.get("mail")) == null){
             hashMap.put("status", FAILURE);
-            hashMap.put("message", EMAILNOTAVAILABLE);
+            hashMap.put("message", USERNOTFOUND);
             data.put("data", hashMap);
             // Object to JSON String
             String jsonString = mapper.writeValueAsString(hashMap);

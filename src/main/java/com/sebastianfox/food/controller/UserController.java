@@ -189,6 +189,7 @@ public class UserController {
 		user.mergeDataFromApp(appUser);
 		userRepository.save(user);
 
+
 		// Successful register
 		hashMap.put("status","success");
 		hashMap.put("user",user);
@@ -339,7 +340,6 @@ public class UserController {
 			user.setSocialMediaAccount(true);
 
 			userRepository.save(user);
-
 
 			Debugger.log("User saved");
 			hashMap.put("status", SUCCESS);

@@ -127,4 +127,25 @@ public class Event {
             member.addEvent(this);
         }
     }
+
+    public void removeMember(User member) {
+        this.members.remove(member);
+        if (member.getEvents().contains(this)) {
+            member.removeEvent(this);
+        }
+    }
+
+    public void clearMembers() {
+        for( User member: members )
+        {
+            if (member.getEvents().contains(this)) {
+                member.removeEvent(this);
+            }
+            this.members.remove(member);
+        }
+    }
+
+    public void removeFromOwnersList() {
+        this.owner.removeOwnedEventFromList(this);
+    }
 }

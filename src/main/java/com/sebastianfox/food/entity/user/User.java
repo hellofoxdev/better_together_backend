@@ -229,6 +229,17 @@ public class User {
         }
     }
 
+    public void removeEvent(Event event){
+        this.events.remove(event);
+        if (event.getMembers().contains(this)) {
+            event.removeMember(this);
+        }
+    }
+
+    public void removeOwnedEventFromList(Event event) {
+        this.events.remove(event);
+    }
+
     public List<Event> getEvents() {
         return events;
     }

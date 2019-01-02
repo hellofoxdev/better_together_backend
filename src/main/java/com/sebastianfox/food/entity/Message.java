@@ -31,7 +31,7 @@ public class Message {
             this.setText(msgGerman);
         }
         else {
-            this.setText(msgGerman);
+            this.setText(msgEnglish);
         }
     }
 

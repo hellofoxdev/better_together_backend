@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.awt.print.Book;
+import java.util.List;
 
 //import hello.User;
 
@@ -18,7 +19,7 @@ import java.awt.print.Book;
 
 public interface EventRepository extends CrudRepository<Event, Long> {
 
-    Event findByOwner(User user);
+    List<Event> findByOwner(User user);
 
     Event findById(Integer id);
 
