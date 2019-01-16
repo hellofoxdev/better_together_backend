@@ -3,6 +3,7 @@ package com.sebastianfox.food.entity.event;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sebastianfox.food.entity.user.User;
+import com.sebastianfox.food.entity.event.Tag;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -42,6 +43,24 @@ public class Event {
             mappedBy = "events")
     @JsonIgnoreProperties({"events", "ownedEvents"})
     private Set<User> members = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "events")
+    @JsonIgnoreProperties({"events", "ownedEvents"})
+    private Set<User> memberRequests = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "events")
+    @JsonIgnoreProperties({"events"})
+    private Set<Tag> tags = new HashSet<>();
 
 
     //   Getter and Setter
@@ -142,6 +161,71 @@ public class Event {
                 member.removeEvent(this);
             }
             this.members.remove(member);
+        }
+    }
+
+    public Set<User> getMemberRequests() {
+        return memberRequests;
+    }
+
+    public void setMemberRequests(Set<User> memberRequests) {
+        this.memberRequests = memberRequests;
+    }
+
+    public void addMemberRequest(User memberRequest) {
+        this.memberRequests.add(memberRequest);
+        if (!memberRequest.getEvents().contains(this)) {
+            memberRequest.addEvent(this);
+        }
+    }
+
+    public void removeMemberRequest(User memberRequest) {
+        this.memberRequests.remove(memberRequest);
+        if (memberRequest.getEvents().contains(this)) {
+            memberRequest.removeEvent(this);
+        }
+    }
+
+    public void clearMemberRequests() {
+        for( User memberRequest: memberRequests )
+        {
+            if (memberRequest.getEvents().contains(this)) {
+                memberRequest.removeEvent(this);
+            }
+            this.memberRequests.remove(memberRequest);
+        }
+    }
+
+
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+        if (!tag.getEvents().contains(this)) {
+            tag.addEvent(this);
+        }
+    }
+
+    public void removeTag(Tag tag) {
+        this.tags.remove(tag);
+        if (tag.getEvents().contains(this)) {
+            tag.removeEvent(this);
+        }
+    }
+
+    public void clearTags() {
+        for( Tag tag: tags )
+        {
+            if (tag.getEvents().contains(this)) {
+                tag.removeEvent(this);
+            }
+            this.tags.remove(tag);
         }
     }
 

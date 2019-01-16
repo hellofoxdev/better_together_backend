@@ -8,7 +8,9 @@ import com.sebastianfox.food.entity.event.Event;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 @Entity // This tells Hibernate to make a table out of this class
@@ -50,26 +52,40 @@ public class User {
             joinColumns=@JoinColumn(name="userId"),
             inverseJoinColumns=@JoinColumn(name="eventId")
     )
-    @JsonIgnoreProperties({"owner", "members"})
+    @JsonIgnoreProperties({"owner", "members", "memberRequests"})
     private List<Event> events;
 
     @OneToMany(mappedBy="owner")
-    @JsonIgnoreProperties({"owner", "members"})
+    @JsonIgnoreProperties({"owner", "members", "memberRequests"})
     private List<Event> ownedEvents;
 
     @ManyToMany
     @JoinTable(name="favorites",
-            joinColumns=@JoinColumn(name="userFriendId"),
-            inverseJoinColumns=@JoinColumn(name="userFavoriteId")
+            joinColumns=@JoinColumn(name="friendId"),
+            inverseJoinColumns=@JoinColumn(name="favoriteId")
     )
     private List<User> friends;
 
+
     @ManyToMany
     @JoinTable(name="favorites",
-            joinColumns=@JoinColumn(name="userFavoriteId"),
-            inverseJoinColumns=@JoinColumn(name="userFriendId")
+            joinColumns=@JoinColumn(name="favoriteId"),
+            inverseJoinColumns=@JoinColumn(name="friendId")
     )
     private List<User> friendOf;
+
+
+/**
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "events")
+    @JsonIgnoreProperties({"owner", "members", "memberRequests", "friends", "friendOf"})
+    private Set<User> friendOf = new HashSet<>();
+*/
+
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
     @JsonManagedReference
@@ -79,7 +95,7 @@ public class User {
 
     public User(){
         this.userImages = new ArrayList<>();
-        this.friendOf = new ArrayList<>();
+        //this.friendOf = new ArrayList<>();
         this.friends = new ArrayList<>();
         this.events = new ArrayList<>();
     }

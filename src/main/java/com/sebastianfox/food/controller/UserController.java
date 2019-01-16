@@ -47,6 +47,12 @@ public class UserController {
         this.eventRepository = eventRepository;
     }
 
+
+	@GetMapping(path = "/test2")
+	public void testFunction2() {
+		System.out.print("hallo");
+	}
+
 	/**
 	 * register
 	 * login
@@ -60,6 +66,29 @@ public class UserController {
 
 	@GetMapping(path = "/test")
     public void testFunction(){
+
+		User user = new User();
+		user.setEmail("sebastian.fox@me.com");
+		user.setUsername("basti1284");
+		user.setSalt(authenticator.getNextSalt());
+		user.setPassword(authenticator.hash("password".toCharArray(), user.getSalt()));
+		userRepository.save(user);
+		user.setSession(sessionGenerator.getSha256(user.getId().toString()));
+		userRepository.save(user);
+
+
+
+		User user2 = new User();
+		user2.setEmail("sebastian.fox@rossox.com");
+		user2.setUsername("sebastian.fox.12");
+		user2.setSalt(authenticator.getNextSalt());
+		user2.setPassword(authenticator.hash("password".toCharArray(), user2.getSalt()));
+		userRepository.save(user2);
+		user2.setSession(sessionGenerator.getSha256(user2.getId().toString()));
+		user2.addFriend(user);
+		userRepository.save(user2);
+
+		/**
 		MovieEvent movie = new MovieEvent();
 		movie.setMovieTitle("Rush Hour");
         eventRepository.save(movie);
@@ -93,6 +122,7 @@ public class UserController {
 
         user.addFriend(user2);
         userRepository.save(user);
+	*/
 	}
 
 	/**
