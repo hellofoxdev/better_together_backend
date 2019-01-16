@@ -63,15 +63,16 @@ public class User {
     @JoinTable(name="favorites",
             joinColumns=@JoinColumn(name="friendId"),
             inverseJoinColumns=@JoinColumn(name="favoriteId")
+
     )
     private List<User> friends;
 
 
     @ManyToMany
-    @JoinTable(name="favorites",
-            joinColumns=@JoinColumn(name="favoriteId"),
-            inverseJoinColumns=@JoinColumn(name="friendId")
-    )
+   // @JoinTable(name="favorites",
+     //       joinColumns=@JoinColumn(name="favoriteId"),
+       //     inverseJoinColumns=@JoinColumn(name="friendId")
+   // )
     private List<User> friendOf;
 
 
@@ -230,6 +231,9 @@ public class User {
 
     public void addFriend(User friend){
         this.friends.add(friend);
+        if (!friend.friends.contains(this)){
+            friend.addFriend(this);
+        }
        // friend.addFriendOf(this);
         //userImage.setUser(this);
     }

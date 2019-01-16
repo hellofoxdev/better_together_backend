@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 
 @SuppressWarnings("Duplicates")
 @Controller    // This means that this class is a Controller
@@ -87,6 +88,15 @@ public class UserController {
 		user2.setSession(sessionGenerator.getSha256(user2.getId().toString()));
 		user2.addFriend(user);
 		userRepository.save(user2);
+
+		System.out.println("User 1: ");
+		for (User friend : user.getFriends()) {
+		    System.out.println(friend.getUsername());
+        }
+		System.out.println("User 2: ");
+        for (User friend : user2.getFriends()) {
+            System.out.println(friend.getUsername());
+        }
 
 		/**
 		MovieEvent movie = new MovieEvent();
