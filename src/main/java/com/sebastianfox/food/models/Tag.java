@@ -1,14 +1,9 @@
-package com.sebastianfox.food.entity.event;
+package com.sebastianfox.food.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sebastianfox.food.entity.user.User;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name="tags")
@@ -74,6 +69,4 @@ public class Tag {
             event.removeTag(this);
         }
     }
-
-    //public void addEvent
 }

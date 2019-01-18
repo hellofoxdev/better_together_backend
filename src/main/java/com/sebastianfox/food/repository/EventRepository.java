@@ -1,18 +1,10 @@
 package com.sebastianfox.food.repository;
 
-import com.sebastianfox.food.entity.event.Event;
-import com.sebastianfox.food.entity.user.User;
-import javax.persistence.Query;
+import com.sebastianfox.food.models.Event;
+import com.sebastianfox.food.models.User;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
-import java.awt.print.Book;
 import java.util.List;
-
-//import hello.User;
-
-//import java.util.List;
-
 
 // This will be AUTO IMPLEMENTED by Spring into a Bean called userRepository
 // CRUD refers Create, Read, Update, Delete

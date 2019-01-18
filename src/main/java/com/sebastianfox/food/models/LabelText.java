@@ -1,37 +1,34 @@
-package com.sebastianfox.food.entity;
+package com.sebastianfox.food.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 
 @SuppressWarnings("unused")
 @Entity // This tells Hibernate to make a table out of this class
-@Table(name="messages")
-public class Message {
+@Table(name="label_texts")
+public class LabelText {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="message_id")
+    @Column(name="label_text_id")
     private Integer id;
 
     private String identifier;
 
     @JsonIgnore
-    private String msgGerman;
+    private String lblGerman;
 
     @JsonIgnore
-    private String msgEnglish;
+    private String lblEnglish;
 
     private String text = "";
 
     public void setTextByLanguage(String language) {
         if (language.toUpperCase().equals("DE")) {
-            this.setText(msgGerman);
+            this.setText(lblGerman);
         }
         else {
-            this.setText(msgEnglish);
+            this.setText(lblEnglish);
         }
     }
 
@@ -55,20 +52,20 @@ public class Message {
         this.identifier = identifier;
     }
 
-    public String getMsgGerman() {
-        return msgGerman;
+    public String getLblGerman() {
+        return lblGerman;
     }
 
-    public void setMsgGerman(String msgGerman) {
-        this.msgGerman = msgGerman;
+    public void setLblGerman(String lblGerman) {
+        this.lblGerman = lblGerman;
     }
 
-    public String getMsgEnglish() {
-        return msgEnglish;
+    public String getLblEnglish() {
+        return lblEnglish;
     }
 
-    public void setMsgEnglish(String msgEnglish) {
-        this.msgEnglish = msgEnglish;
+    public void setLblEnglish(String lblEnglish) {
+        this.lblEnglish = lblEnglish;
     }
 
     public String getText() {

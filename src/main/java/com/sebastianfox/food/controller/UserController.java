@@ -1,13 +1,9 @@
 package com.sebastianfox.food.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sebastianfox.food.entity.event.Event;
-import com.sebastianfox.food.entity.user.UserImage;
-import com.sebastianfox.food.entity.event.food.FoodEvent;
 import com.sebastianfox.food.repository.EventRepository;
 import com.sebastianfox.food.utils.Authenticator;
-import com.sebastianfox.food.entity.event.movie.MovieEvent;
-import com.sebastianfox.food.entity.user.User;
+import com.sebastianfox.food.models.User;
 import com.sebastianfox.food.repository.UserRepository;
 import com.sebastianfox.food.utils.Debugger;
 import com.sebastianfox.food.utils.Sha256Converter;
@@ -20,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 
 @SuppressWarnings("Duplicates")
 @Controller    // This means that this class is a Controller
@@ -47,7 +42,6 @@ public class UserController {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
     }
-
 
 	@GetMapping(path = "/test2")
 	public void testFunction2() {
@@ -115,10 +109,6 @@ public class UserController {
 		userRepository.save(user);
 		user.setSession(sessionGenerator.getSha256(user.getId().toString()));
 		userRepository.save(user);
-
-        UserImage userImage = new UserImage();
-        userImage.setName("Mein Profilbild");
-        user.addUserImage(userImage);
         userRepository.save(user);
 
         User user2 = new User();

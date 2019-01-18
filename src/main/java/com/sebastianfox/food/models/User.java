@@ -1,21 +1,18 @@
-package com.sebastianfox.food.entity.user;
+package com.sebastianfox.food.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sebastianfox.food.entity.event.Event;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 @Entity // This tells Hibernate to make a table out of this class
 @Table(name="users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="user_id")
@@ -30,6 +27,8 @@ public class User {
     private String firstname;
 
     private String lastname;
+
+    private byte[] image;
 
     @JsonIgnore
     private byte[] password;
@@ -67,45 +66,21 @@ public class User {
     )
     private List<User> friends;
 
-
     @ManyToMany
-   // @JoinTable(name="favorites",
-     //       joinColumns=@JoinColumn(name="favoriteId"),
-       //     inverseJoinColumns=@JoinColumn(name="friendId")
-   // )
     private List<User> friendOf;
-
-
-/**
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "events")
-    @JsonIgnoreProperties({"owner", "members", "memberRequests", "friends", "friendOf"})
-    private Set<User> friendOf = new HashSet<>();
-*/
-
-
-    @OneToMany(mappedBy="user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<UserImage> userImages;
 
     //  Constructor
 
+
     public User(){
-        this.userImages = new ArrayList<>();
         //this.friendOf = new ArrayList<>();
         this.friends = new ArrayList<>();
         this.events = new ArrayList<>();
     }
 
-    //  functions
+    //  Methods
 
     /**
-     *
-     *
      * @param appUser data transformed as user from app
      * @return user with new data with data from app
      */
@@ -187,14 +162,6 @@ public class User {
         this.facebookUsername = facebookUsername;
     }
 
-    public List<UserImage> getUserImages() {
-        return userImages;
-    }
-
-    public void setUserImages(List<UserImage> userImages) {
-        this.userImages = userImages;
-    }
-
     public String getFirstname() {
         return firstname;
     }
@@ -210,12 +177,6 @@ public class User {
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-
-    public void addUserImage(UserImage userImage){
-        this.userImages.add(userImage);
-        userImage.setUser(this);
-    }
-
     public boolean isSocialMediaAccount() {
         return socialMediaAccount;
     }
@@ -224,18 +185,11 @@ public class User {
         this.socialMediaAccount = socialMediaAccount;
     }
 
-   /* public void addFriendOf(User user){
-        user.friendOf.add(this);
-        this.addFriend(user);
-    }*/
-
     public void addFriend(User friend){
         this.friends.add(friend);
         if (!friend.friends.contains(this)){
             friend.addFriend(this);
         }
-       // friend.addFriendOf(this);
-        //userImage.setUser(this);
     }
 
     public List<User> getFriends() {
@@ -278,6 +232,14 @@ public class User {
 
     public void addOwnedEvent(Event ownedEvent) {
         this.ownedEvents.add(ownedEvent);
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 }
 

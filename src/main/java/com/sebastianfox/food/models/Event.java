@@ -1,9 +1,6 @@
-package com.sebastianfox.food.entity.event;
+package com.sebastianfox.food.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sebastianfox.food.entity.user.User;
-import com.sebastianfox.food.entity.event.Tag;
 
 import javax.persistence.*;
 import java.util.Date;
