@@ -125,6 +125,36 @@ public class UserController {
 	*/
 	}
 
+
+	/**
+	 *
+	 * @param userData JSON data from App
+	 * @return http response
+	 * @throws JSONException exception
+	 * @throws IOException exception
+	 */
+	@SuppressWarnings("Duplicates")
+	@RequestMapping(path = "/testUser", method = RequestMethod.POST, consumes = {"application/json"})
+	public ResponseEntity<Object> testUser(@RequestBody HashMap<String, User> userData) throws JSONException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String,HashMap> data = new HashMap<>();
+		HashMap<String,Object> hashMap = new HashMap<>();
+		User appUser = userData.get("user");
+		User user = userRepository.findById(appUser.getId());
+		user.mergeDataFromApp(appUser);
+		userRepository.save(user);
+
+
+		// Successful register
+		hashMap.put("status","success");
+		hashMap.put("user",user);
+		data.put("data", hashMap);
+		// Object to JSON String
+		String jsonString = mapper.writeValueAsString(hashMap);
+		// Return to App
+		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+	}
+
 	/**
 	 *
 	 * @param loginData JSON data from App

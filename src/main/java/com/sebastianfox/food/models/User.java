@@ -3,8 +3,10 @@ package com.sebastianfox.food.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import javax.xml.soap.Text;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,9 @@ public class User {
     private String lastname;
 
     private byte[] image;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String imageString;
 
     @JsonIgnore
     private byte[] password;
@@ -89,6 +94,7 @@ public class User {
         this.email = appUser.email;
         this.lastname = appUser.lastname;
         this.firstname = appUser.firstname;
+        this.imageString = appUser.imageString;
         return this;
     }
 
@@ -240,6 +246,14 @@ public class User {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public String getImageString() {
+        return imageString;
+    }
+
+    public void setImageString(String imageString) {
+        this.imageString = imageString;
     }
 }
 
