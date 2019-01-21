@@ -10,6 +10,7 @@ import java.util.Set;
 @Entity
 @Table(name="events")
 public class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="event_id")
@@ -22,6 +23,9 @@ public class Event {
     private Date date;
 
     private boolean publicEvent = false;
+
+    @Enumerated(EnumType.STRING)
+    private EventTypes eventType;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable=false)
@@ -216,6 +220,8 @@ public class Event {
         }
     }
 
+
+
     public void clearTags() {
         for( Tag tag: tags )
         {
@@ -228,5 +234,13 @@ public class Event {
 
     public void removeFromOwnersList() {
         this.owner.removeOwnedEventFromList(this);
+    }
+
+    public EventTypes getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(EventTypes eventType) {
+        this.eventType = eventType;
     }
 }

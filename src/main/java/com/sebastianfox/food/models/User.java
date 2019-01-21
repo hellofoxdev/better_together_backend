@@ -3,10 +3,8 @@ package com.sebastianfox.food.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import javax.xml.soap.Text;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,26 +18,27 @@ public class User {
     @Column(name="user_id")
     private Integer id;
 
+    /** personal data */
     private String username;
 
     private String email;
-
-    private String session;
 
     private String firstname;
 
     private String lastname;
 
-    private byte[] image;
-
     @Column(columnDefinition = "LONGTEXT")
     private String imageString;
 
+    /** Security - Password and Salt */
     @JsonIgnore
     private byte[] password;
 
     @JsonIgnore
     private byte[] salt;
+
+    /** Facebook - id/mail/socialAcoount */
+    private long facebookId;
 
     private String facebookMail;
 
@@ -47,6 +46,7 @@ public class User {
 
     private boolean socialMediaAccount = false;
 
+    /** Events - list of evets and ownd events */
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
@@ -63,8 +63,9 @@ public class User {
     @JsonIgnoreProperties({"owner", "members", "memberRequests"})
     private List<Event> ownedEvents;
 
+    /** Friends - List of friends (both sides) */
     @ManyToMany
-    @JoinTable(name="favorites",
+    @JoinTable(name="friends",
             joinColumns=@JoinColumn(name="friendId"),
             inverseJoinColumns=@JoinColumn(name="favoriteId")
 
@@ -74,13 +75,14 @@ public class User {
     @ManyToMany
     private List<User> friendOf;
 
-    //  Constructor
-
-
+    /**
+     * Constructor
+     */
     public User(){
-        //this.friendOf = new ArrayList<>();
+        this.friendOf = new ArrayList<>();
         this.friends = new ArrayList<>();
         this.events = new ArrayList<>();
+        this.ownedEvents = new ArrayList<>();
     }
 
     //  Methods
@@ -99,7 +101,6 @@ public class User {
     }
 
     //  getter and setter
-
     public Integer getId() {
         return id;
     }
@@ -144,14 +145,6 @@ public class User {
         this.salt = salt;
     }
 
-    public String getSession() {
-        return session;
-    }
-
-    public void setSession(String session) {
-        this.session = session;
-    }
-
     public String getFacebookMail() {
         return facebookMail;
     }
@@ -189,17 +182,6 @@ public class User {
 
     public void setSocialMediaAccount(boolean socialMediaAccount) {
         this.socialMediaAccount = socialMediaAccount;
-    }
-
-    public void addFriend(User friend){
-        this.friends.add(friend);
-        if (!friend.friends.contains(this)){
-            friend.addFriend(this);
-        }
-    }
-
-    public List<User> getFriends() {
-        return friends;
     }
 
     public void addEvent(Event event){
@@ -240,20 +222,84 @@ public class User {
         this.ownedEvents.add(ownedEvent);
     }
 
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
-
     public String getImageString() {
         return imageString;
     }
 
     public void setImageString(String imageString) {
         this.imageString = imageString;
+    }
+
+    public List<User> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<User> friends) {
+        this.friends = friends;
+    }
+
+    /**
+     * add friend to array of friends
+     * @param friend user
+     */
+    private void addFriend(User friend){
+        if (this.friends.contains(friend)) {
+            this.friends.add(friend);
+        }
+        if (!friend.getFriendOf().contains(this)){
+            friend.addFriendOf(this);
+        }
+    }
+
+    /**
+     * Get friends of
+     * @return list of firends the current user is
+     */
+    private List<User> getFriendsOfFriends() {
+        List<User> friendsOfFriends = new ArrayList<>();
+        for (User friend : friends) {
+            friendsOfFriends.add(friend);
+            friendsOfFriends.addAll(friend.getFriends());
+        }
+        return friendsOfFriends;
+    }
+
+    /**
+     * Get friends of
+     * @return list of firends the current user is
+     */
+    private List<User> getFriendOf() {
+        return friendOf;
+    }
+
+    public void setFriendOf(List<User> friendOf) {
+        this.friendOf = friendOf;
+    }
+
+
+    public void addFriendOf(User friendOf){
+        if (!this.friendOf.contains(friendOf)) {
+            this.friendOf.add(friendOf);
+        }
+        if (!friendOf.getFriends().contains(this)){
+            friendOf.addFriend(this);
+        }
+    }
+
+    /**
+     * Get Facebook ID
+     * @return facebookId
+     */
+    public long getFacebookId() {
+        return facebookId;
+    }
+
+    /**
+     * Set Facebook id
+     * @param facebookId id
+     */
+    public void setFacebookId(long facebookId) {
+        this.facebookId = facebookId;
     }
 }
 
