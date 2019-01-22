@@ -1,6 +1,9 @@
 package com.sebastianfox.food.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sebastianfox.food.enums.EventTypes;
+import com.sebastianfox.food.enums.PrivacyTypes;
+import com.sebastianfox.food.utils.CRUDDetails;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -9,23 +12,24 @@ import java.util.Set;
 
 @Entity
 @Table(name="events")
-public class Event {
+public class Event extends CRUDDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="event_id")
     private Integer id;
 
-    private String title;
+    private String text;
 
     private String location;
 
     private Date date;
 
-    private boolean publicEvent = false;
+    @Enumerated(EnumType.STRING)
+    private PrivacyTypes privacyTypes = PrivacyTypes.FRIENDS;
 
     @Enumerated(EnumType.STRING)
-    private EventTypes eventType;
+    private EventTypes eventType = EventTypes.OTHERS;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable=false)
@@ -74,12 +78,12 @@ public class Event {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getText() {
+        return text;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public String getLocation() {
@@ -112,14 +116,6 @@ public class Event {
 
     public void setMaxParticipants(Integer maxParticipants) {
         this.maxParticipants = maxParticipants;
-    }
-
-    public boolean isPublicEvent() {
-        return publicEvent;
-    }
-
-    public void setPublicEvent(boolean publicEvent) {
-        this.publicEvent = publicEvent;
     }
 
     public User getOwner() {
@@ -242,5 +238,13 @@ public class Event {
 
     public void setEventType(EventTypes eventType) {
         this.eventType = eventType;
+    }
+
+    public PrivacyTypes getPrivacyTypes() {
+        return privacyTypes;
+    }
+
+    public void setPrivacyTypes(PrivacyTypes privacyTypes) {
+        this.privacyTypes = privacyTypes;
     }
 }

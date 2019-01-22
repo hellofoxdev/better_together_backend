@@ -57,7 +57,7 @@ public class EventController {
 
         Iterable<Event> events = eventRepository.findAll();
         for (Event event : events) {
-            System.out.print(event.getTitle());
+            System.out.print(event.getText());
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -112,7 +112,7 @@ public class EventController {
 
         Iterable<Event> events = eventRepository.findByOwner(appUser);
         for (Event event : events) {
-            System.out.print(event.getTitle());
+            System.out.print(event.getText());
         }
 
         // Successful login
@@ -150,7 +150,7 @@ public class EventController {
 
         User user = userRepository.findByEmail(eventData.get("mail"));
         Event event = new Event();
-        event.setTitle(eventData.get("title"));
+        event.setText(eventData.get("title"));
         event.setDescription(eventData.get("description"));
         event.setOwner(user);
         event.addMember(user);
@@ -194,7 +194,7 @@ public class EventController {
 
         User user = userRepository.findByEmail(eventData.get("mail"));
         Event event = new Event();
-        event.setTitle(eventData.get("title"));
+        event.setText(eventData.get("title"));
         event.setDescription(eventData.get("description"));
         event.setOwner(user);
         event.addMember(user);

@@ -1,4 +1,4 @@
-package com.sebastianfox.food.models;
+package com.sebastianfox.food.enums;
 
 public enum EventTypes {
     ENTERTAINMENT,

@@ -2,7 +2,7 @@ package com.sebastianfox.food.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebastianfox.food.models.Event;
-import com.sebastianfox.food.models.EventTypes;
+import com.sebastianfox.food.enums.EventTypes;
 import com.sebastianfox.food.models.Invitation;
 import com.sebastianfox.food.repository.EventRepository;
 import com.sebastianfox.food.repository.InvitationRepository;
@@ -19,6 +19,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 @SuppressWarnings("Duplicates")
@@ -66,7 +71,7 @@ public class UserController {
 	 */
 
 	@GetMapping(path = "/test")
-    public void testFunction(){
+    public void testFunction() throws ParseException {
 
 		User user = new User();
 		user.setEmail("sebastian.fox@me.com");
@@ -97,9 +102,16 @@ public class UserController {
 
 		//event
 		Event event = new Event();
-		event.setTitle("Test Event");
+		event.setText("Test Event");
 		event.setEventType(EventTypes.COOKING);
 		event.setOwner(user);
+		Date testdate = new GregorianCalendar(1984, 11, 12).getTime();
+		//event.setDate(date2);
+
+		String string = "12.12.1984";
+		DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+		Date date = format.parse(string);
+		event.setDate(date);
 		eventRepository.save(event);
 /**
 
