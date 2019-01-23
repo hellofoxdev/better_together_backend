@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 @Controller    // This means that this class is a Controller
 @RequestMapping(path = "/api/event") // This means URL's start with /api (after Application path)
 public class EventController {
@@ -176,38 +177,11 @@ public class EventController {
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/createNewEventByEvent", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createNewEventByEvent(@RequestBody HashMap<String, Event> eventData) throws JSONException, IOException {
+    public ResponseEntity<Object> createNewEventByEvent(@RequestBody HashMap<String, Event> eventData) throws JSONException {
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String,HashMap> data = new HashMap<>();
         HashMap<String,Object> hashMap = new HashMap<>();
         Event event = eventData.get("event");
-
-        /**
-        if (userRepository.findByEmail(eventData.get("mail")) == null){
-            hashMap.put("status", FAILURE);
-            hashMap.put("message", EVENTNOTFOUND);
-            data.put("data", hashMap);
-            // Object to JSON String
-            String jsonString = mapper.writeValueAsString(hashMap);
-            return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
-        }
-
-        User user = userRepository.findByEmail(eventData.get("mail"));
-        Event event = new Event();
-        event.setText(eventData.get("title"));
-        event.setDescription(eventData.get("description"));
-        event.setOwner(user);
-        event.addMember(user);
-        eventRepository.save(event);
-
-        // Successful register
-        hashMap.put("status","success");
-        hashMap.put("event",event);
-        data.put("data", hashMap);
-        // Object to JSON String
-        String jsonString = mapper.writeValueAsString(hashMap);
-        // Return to App
-         */
         return new ResponseEntity<>("jsonString", HttpStatus.ACCEPTED);
     }
 

@@ -10,7 +10,8 @@ import com.sebastianfox.food.utils.Authenticator;
 import com.sebastianfox.food.models.User;
 import com.sebastianfox.food.repository.UserRepository;
 import com.sebastianfox.food.utils.Debugger;
-import com.sebastianfox.food.utils.Sha256Converter;
+// import com.sebastianfox.food.utils.Sha256Converter;
+import org.apache.coyote.http2.Http2Error;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings("Duplicates")
 @Controller    // This means that this class is a Controller
@@ -41,7 +43,7 @@ public class UserController {
 	private final UserRepository userRepository;
 	private final EventRepository eventRepository;
 	private final InvitationRepository invitationRepository;
-	private Sha256Converter sessionGenerator = new Sha256Converter();
+	//private Sha256Converter sessionGenerator = new Sha256Converter();
 
 	private Authenticator authenticator = new Authenticator();
 
@@ -89,7 +91,11 @@ public class UserController {
 		user2.setSalt(authenticator.getNextSalt());
 		user2.setPassword(authenticator.hash("password".toCharArray(), user2.getSalt()));
 		userRepository.save(user2);
-		//user2.addFriend(user);
+		user2.addFriend(user);
+		user.addFriendOf(user2);
+		List<User> friendsOf = user.getFriendOf();
+
+
 		//user2.createInvitation(user);
 	//	user2.createInvitation(user);
 		userRepository.save(user2);
@@ -291,7 +297,7 @@ public class UserController {
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
-		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(jsonString, HttpStatus.OK);
 	}
 
 	/**
@@ -377,13 +383,11 @@ public class UserController {
 		String password = (String) registerData.get("password");
 
 		ObjectMapper mapper = new ObjectMapper();
-		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
 
 		if (userRepository.findByUsername(username) != null){
 			hashMap.put("status", FAILURE);
 			hashMap.put("message", USERNAMENOTAVAILABLE);
-			data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(hashMap);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
@@ -391,7 +395,6 @@ public class UserController {
 		if (userRepository.findByEmail(mail) != null){
 			hashMap.put("status", "failure");
 			hashMap.put("message", EMAILNOTAVAILABLE);
-			data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(hashMap);
 			return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
@@ -413,7 +416,6 @@ public class UserController {
 		// Successful register
 		hashMap.put("status","success");
 		hashMap.put("user", user);
-		data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
@@ -431,7 +433,6 @@ public class UserController {
 	@RequestMapping(path = "/facebookLogin", method = RequestMethod.POST, consumes = {"application/json"})
 	public ResponseEntity<Object> facebookLogin(@RequestBody HashMap<String, Object> loginData) throws JSONException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
 		User facebookUser = userRepository.findByFacebookMail((String) loginData.get("facebookMail"));
 		if (facebookUser == null){
@@ -439,21 +440,15 @@ public class UserController {
 			// Create and safe new user
 			User user = new User();
 			user.setUsername((String) loginData.get("facebookMail"));
-			Debugger.log(loginData.get("facebookMail") + "for Username");
 			user.setEmail((String) loginData.get("facebookMail"));
-			Debugger.log(loginData.get("facebookMail") + "for Email");
 			user.setFacebookMail((String) loginData.get("facebookMail"));
-			Debugger.log(loginData.get("facebookMail") + "for Facebookmail");
-
 			user.setSocialMediaAccount(true);
-
 			userRepository.save(user);
 
 			Debugger.log("User saved");
 			hashMap.put("status", SUCCESS);
 			hashMap.put("message", FACEBOOKUSERCREATED);
 			hashMap.put("user", user);
-			data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(hashMap);
 
@@ -464,14 +459,13 @@ public class UserController {
 		// Successful register
 		hashMap.put("status",SUCCESS);
 		hashMap.put("user", facebookUser);
-		data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
 		return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
 	}
 
-	/**
+	/*
 	 *
 	 * @param userData JSON data from App
 	 * @return http response
@@ -519,14 +513,14 @@ public class UserController {
 	public ResponseEntity<Object> findByUsername(@RequestBody HashMap<String, Object> username) throws JSONException, IOException {
 		User user = userRepository.findByUsername((String) username.get("username"));
 		ObjectMapper mapper = new ObjectMapper();
-		HashMap<String,HashMap> data = new HashMap<>();
+		//HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
 
 		// Failure at login (user not found or bad credentials)
 		if (user == null) {
 			hashMap.put("status", FAILURE);
 			hashMap.put("message", USERNOTFOUND);
-			data.put("data", hashMap);
+		//	data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(hashMap);
 			// Return to App
@@ -536,7 +530,7 @@ public class UserController {
 		hashMap.put("session",user.getId().toString());
 		hashMap.put("status","success");
 		hashMap.put("user",user);
-		data.put("data", hashMap);
+		//data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
@@ -554,14 +548,14 @@ public class UserController {
 	public ResponseEntity<Object> findByMail(@RequestBody HashMap<String, Object> mail) throws JSONException, IOException {
 		User user = userRepository.findByEmail((String) mail.get("mail"));
 		ObjectMapper mapper = new ObjectMapper();
-		HashMap<String,HashMap> data = new HashMap<>();
+		//HashMap<String,HashMap> data = new HashMap<>();
 		HashMap<String,Object> hashMap = new HashMap<>();
 
 		// Failure at login (user not found or bad credentials)
 		if (user == null) {
 			hashMap.put("status", FAILURE);
 			hashMap.put("message", USERNOTFOUND);
-			data.put("data", hashMap);
+			//data.put("data", hashMap);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(hashMap);
 			// Return to App
@@ -571,7 +565,7 @@ public class UserController {
 		hashMap.put("session",user.getId().toString());
 		hashMap.put("status","success");
 		hashMap.put("user",user);
-		data.put("data", hashMap);
+		//data.put("data", hashMap);
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App

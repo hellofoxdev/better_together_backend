@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.util.List;
 
+
+@SuppressWarnings("unused")
 @Entity
 @Table(name="locations")
 public class Location {

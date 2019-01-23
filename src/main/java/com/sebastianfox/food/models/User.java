@@ -89,26 +89,37 @@ public class User {
 
     /**
      * @param appUser data transformed as user from app
-     * @return user with new data with data from app
      */
-    public User mergeDataFromApp(User appUser) {
+    public void mergeDataFromApp(User appUser) {
         this.username = appUser.username;
         this.email = appUser.email;
         this.lastname = appUser.lastname;
         this.firstname = appUser.firstname;
         this.imageString = appUser.imageString;
-        return this;
     }
 
-    //  getter and setter
+    // Getter and Setter methods
+
+    /**
+     * Get id
+     * @return Integer id
+     */
     public Integer getId() {
         return id;
     }
 
+    /**
+     * Set id
+     * @param id of user
+     */
     public void setId(Integer id) {
         this.id = id;
     }
 
+    /**
+     * Get username
+     * @return String username of user
+     */
     public String getUsername() {
         return username;
     }
@@ -117,6 +128,10 @@ public class User {
         this.username = username;
     }
 
+    /**
+     * Get email
+     * @return String email of user
+     */
     public String getEmail() {
         return email;
     }
@@ -125,16 +140,28 @@ public class User {
         this.email = email;
     }
 
+    /**
+     * Get password
+     * @return String password of user (ignored by JSON)
+     */
     @JsonIgnore
     public byte[] getPassword() {
         return password;
     }
 
+    /**
+     * Set password
+     * @param password of user
+     */
     @JsonProperty
     public void setPassword(byte[] password) {
         this.password = password;
     }
 
+    /**
+     * Get salt
+     * @return byte[] salt of user
+     */
     @JsonIgnore
     public byte[] getSalt() {
         return salt;
@@ -242,7 +269,7 @@ public class User {
      * add friend to array of friends
      * @param friend user
      */
-    private void addFriend(User friend){
+    public void addFriend(User friend){
         if (this.friends.contains(friend)) {
             this.friends.add(friend);
         }
@@ -255,7 +282,7 @@ public class User {
      * Get friends of
      * @return list of firends the current user is
      */
-    private List<User> getFriendsOfFriends() {
+    public List<User> getFriendsOfFriends() {
         List<User> friendsOfFriends = new ArrayList<>();
         for (User friend : friends) {
             friendsOfFriends.add(friend);
@@ -268,7 +295,7 @@ public class User {
      * Get friends of
      * @return list of firends the current user is
      */
-    private List<User> getFriendOf() {
+    public List<User> getFriendOf() {
         return friendOf;
     }
 
