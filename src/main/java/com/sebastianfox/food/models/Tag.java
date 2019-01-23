@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 @Entity
 @Table(name="tags")
 public class Tag {

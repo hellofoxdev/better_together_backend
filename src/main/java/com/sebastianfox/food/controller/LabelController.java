@@ -46,13 +46,11 @@ public class LabelController {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        HashMap<String,HashMap> data = new HashMap<>();
         HashMap<String,Object> hashMap = new HashMap<>();
 
         // Successful login
         hashMap.put("status","success");
         hashMap.put("labels",labels);
-        data.put("data", hashMap);
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App

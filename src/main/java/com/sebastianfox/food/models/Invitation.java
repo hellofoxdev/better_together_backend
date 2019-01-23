@@ -1,8 +1,5 @@
 package com.sebastianfox.food.models;
 
-import com.sebastianfox.food.repository.InvitationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.persistence.*;
 
 @SuppressWarnings("unused")

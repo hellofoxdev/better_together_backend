@@ -19,14 +19,6 @@ import java.util.HashMap;
 @Controller    // This means that this class is a Controller
 @RequestMapping(path = "/api/event") // This means URL's start with /api (after Application path)
 public class EventController {
-    private static final String USERNAMENOTAVAILABLE = "Benutzername bereits registriert";
-    private static final String USERNOTFOUND = "User in nicht gefunden";
-    private static final String EVENTNOTFOUND = "Event in nicht gefunden";
-    private static final String EMAILNOTAVAILABLEEMAILNOTAVAILABLE = "Email Adresse bereits registriert";
-    private static final String FACEBOOKUSERCREATED = "Facebook User wurde angelegt";
-    private static final String BADCREDENTIALS = "Username oder Passwort falsch";
-    private static final String FAILURE = "failure";
-    private static final String SUCCESS = "success";
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -62,26 +54,14 @@ public class EventController {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        HashMap<String,HashMap> data = new HashMap<>();
         HashMap<String,Object> hashMap = new HashMap<>();
 
         // Successful login
-        hashMap.put("status","success");
-        hashMap.put("events",events);
-        data.put("data", hashMap);
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
         return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
     }
-
-    /**
-     *
-     * @param userData JSON data from App
-     * @return http response
-     * @throws JSONException exception
-     * @throws IOException exception
-     */
 
     /**
      *
@@ -104,8 +84,6 @@ public class EventController {
 
         // check if user is available in database
         if (appUser != null && userRepository.findById(appUser.getId()) == null) {
-            hashMap.put("status", FAILURE);
-            hashMap.put("message", EVENTNOTFOUND);
             String jsonString = mapper.writeValueAsString(hashMap);
             return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
         }
@@ -117,9 +95,6 @@ public class EventController {
         }
 
         // Successful login
-        hashMap.put("status","success");
-        hashMap.put("events",events);
-        data.put("data", hashMap);
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
@@ -141,9 +116,6 @@ public class EventController {
         HashMap<String,Object> hashMap = new HashMap<>();
 
         if (userRepository.findByEmail(eventData.get("mail")) == null){
-            hashMap.put("status", FAILURE);
-            hashMap.put("message", EVENTNOTFOUND);
-            data.put("data", hashMap);
             // Object to JSON String
             String jsonString = mapper.writeValueAsString(hashMap);
             return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
@@ -158,9 +130,6 @@ public class EventController {
         eventRepository.save(event);
 
         // Successful register
-        hashMap.put("status","success");
-        hashMap.put("event",event);
-        data.put("data", hashMap);
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
@@ -173,13 +142,11 @@ public class EventController {
      * @param eventData JSON data from App
      * @return http response
      * @throws JSONException exception
-     * @throws IOException exception
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/createNewEventByEvent", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> createNewEventByEvent(@RequestBody HashMap<String, Event> eventData) throws JSONException {
         ObjectMapper mapper = new ObjectMapper();
-        HashMap<String,HashMap> data = new HashMap<>();
         HashMap<String,Object> hashMap = new HashMap<>();
         Event event = eventData.get("event");
         return new ResponseEntity<>("jsonString", HttpStatus.ACCEPTED);
@@ -200,23 +167,15 @@ public class EventController {
         HashMap<String,Object> hashMap = new HashMap<>();
         Event appEvent = eventData.get("event");
 
+        Event event = eventRepository.findById(appEvent.getId());
         // check if user is available in database
-        if (eventRepository.findById(appEvent.getId()) == null){
-            hashMap.put("status", FAILURE);
-            hashMap.put("message", USERNOTFOUND);
-            //data.put("data", hashMap);
+        if (event == null){
             // Object to JSON String
             String jsonString = mapper.writeValueAsString(hashMap);
             return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
         }
 
-
-        Event event = eventRepository.findById(appEvent.getId());
-
         // Successful register
-        hashMap.put("status","success");
-        hashMap.put("event",event);
-        //data.put("data", hashMap);
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
@@ -231,30 +190,23 @@ public class EventController {
      * @throws IOException exception
      */
     @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/reloadEventbId", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> reloadEventById(@RequestBody HashMap<String, Integer> eventData) throws JSONException, IOException {
+    @RequestMapping(path = "/reloadEventId", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> reloadEventById(@RequestBody HashMap<String, Object> eventData) throws JSONException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String,HashMap> data = new HashMap<>();
         HashMap<String,Object> hashMap = new HashMap<>();
-        Integer id = eventData.get("id");
+        Integer id = (Integer) eventData.get("id");
+
+        Event event = eventRepository.findById(id);
 
         // check if user is available in database
-        if (eventRepository.findById(id) == null){
-            hashMap.put("status", FAILURE);
-            hashMap.put("message", USERNOTFOUND);
-            //data.put("data", hashMap);
+        if (event == null){
             // Object to JSON String
             String jsonString = mapper.writeValueAsString(hashMap);
             return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
         }
 
-
-        Event event = eventRepository.findById(id);
-
         // Successful register
-        hashMap.put("status","success");
-        hashMap.put("event",event);
-        //data.put("data", hashMap);
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App

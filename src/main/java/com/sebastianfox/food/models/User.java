@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 @Entity // This tells Hibernate to make a table out of this class
 @Table(name="users")
 public class User {
@@ -96,6 +96,32 @@ public class User {
         this.lastname = appUser.lastname;
         this.firstname = appUser.firstname;
         this.imageString = appUser.imageString;
+
+        /* Not ncessary?
+        for (Event event : appUser.getEvents()) {
+            if (!this.events.contains(event)){
+                this.events.add(event);
+            }
+        }
+
+        for (Event event : appUser.getOwnedEvents()) {
+            if (!this.ownedEvents.contains(event)){
+                this.ownedEvents.add(event);
+            }
+        }
+
+        for (User friend : appUser.getFriends()) {
+            if (!this.friends.contains(friend)){
+                this.friends.add(friend);
+            }
+        }
+
+        for (User friendOf : appUser.getFriendOf()) {
+            if (!this.friendOf.contains(friendOf)){
+                this.friendOf.add(friendOf);
+            }
+        }
+        */
     }
 
     // Getter and Setter methods

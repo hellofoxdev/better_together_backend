@@ -1,5 +1,6 @@
 package com.sebastianfox.food.utils;
 
+@SuppressWarnings("unused")
 public class Debugger{
 
     private Integer level;

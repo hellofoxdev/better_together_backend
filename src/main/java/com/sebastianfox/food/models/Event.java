@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 @Entity
 @Table(name="events")
 public class Event extends CRUDDetails {

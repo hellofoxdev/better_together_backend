@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public interface InvitationRepository extends CrudRepository<Invitation, Long> {
 
     Invitation findById(Integer id);

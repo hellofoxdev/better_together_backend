@@ -2,6 +2,7 @@ package com.sebastianfox.food.utils;
 
 import java.util.Date;
 
+@SuppressWarnings("unused")
 public class CRUDDetails {
 
     private Date created;

@@ -1,13 +1,15 @@
 package com.sebastianfox.food.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+@SuppressWarnings("unused")
 public class Sha256Converter {
 
     public String getSha256(String base) {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
 
             for (byte aHash : hash) {
