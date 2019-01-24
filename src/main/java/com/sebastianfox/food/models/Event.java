@@ -13,7 +13,7 @@ import java.util.Set;
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity
 @Table(name="events")
-public class Event extends CRUDDetails {
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -67,6 +67,8 @@ public class Event extends CRUDDetails {
             mappedBy = "events")
     @JsonIgnoreProperties({"events"})
     private Set<Tag> tags = new HashSet<>();
+    private Date updated;
+    private Date created;
 
 
     //   Getter and Setter
@@ -247,5 +249,17 @@ public class Event extends CRUDDetails {
 
     public void setPrivacyTypes(PrivacyTypes privacyTypes) {
         this.privacyTypes = privacyTypes;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        created = now;
+        updated = now;
     }
 }

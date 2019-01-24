@@ -97,46 +97,18 @@ public class EventController {
      * @param eventData JSON data from App
      * @return http response
      * @throws JSONException exception
-     * @throws IOException exception
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/createNewEvent", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createNewEvent(@RequestBody HashMap<String, Object> eventData) throws JSONException, IOException {
+    public ResponseEntity<Object> createNewEventByEvent(@RequestHeader(value="xxx") String xxx, @RequestBody HashMap<String, Object> eventData) throws JSONException {
+        int i = 5;
+        String xy = xxx;
+        System.out.println(xy);
+
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
-
         Event event = (Event) eventData.get("event");
-        eventRepository.save(event);
-
-        /*
-        User user = userRepository.findById(eventData.get("mail"));
-        Event event = new Event();
-        event.setText(eventData.get("title"));
-        event.setDescription(eventData.get("description"));
-        event.setOwner(user);
-        event.addMember(user);
-        eventRepository.save(event);*/
-
-        // Object to JSON String
-        hashMap.put("event",event);
-        String jsonString = mapper.writeValueAsString(hashMap);
-        // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.CREATED);
-    }
-
-    /**
-     *
-     * @param eventData JSON data from App
-     * @return http response
-     * @throws JSONException exception
-     */
-    @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/createNewEvent", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createNewEventByEvent(@RequestBody HashMap<String, Event> eventData) throws JSONException {
-        ObjectMapper mapper = new ObjectMapper();
-        HashMap<String,Object> hashMap = new HashMap<>();
-        Event event = eventData.get("event");
-        return new ResponseEntity<>("jsonString", HttpStatus.ACCEPTED);
+        return new ResponseEntity<>("jsonString", HttpStatus.CREATED);
     }
 
     /**
