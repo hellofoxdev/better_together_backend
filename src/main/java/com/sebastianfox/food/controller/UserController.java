@@ -62,9 +62,6 @@ public class UserController {
 		user.setSalt(authenticator.getNextSalt());
 		user.setPassword(authenticator.hash("password".toCharArray(), user.getSalt()));
 		userRepository.save(user);
-		userRepository.save(user);
-
-
 
 		User user2 = new User();
 		user2.setEmail("sebastian.fox@rossox.com");
@@ -103,7 +100,6 @@ public class UserController {
 		eventRepository.save(event);
 	}
 
-
 	/**
 	 *
 	 * @param userData JSON data from App
@@ -120,7 +116,6 @@ public class UserController {
 		User user = userRepository.findById(appUser.getId());
 		user.mergeDataFromApp(appUser);
 		userRepository.save(user);
-
 
 		// Successful register
 		hashMap.put("user",user);
@@ -306,7 +301,7 @@ public class UserController {
 		// Object to JSON String
 		String jsonString = mapper.writeValueAsString(hashMap);
 		// Return to App
-		return new ResponseEntity<>(jsonString, HttpStatus.OK);
+		return new ResponseEntity<>(jsonString, HttpStatus.CREATED);
 	}
 
 	/**
@@ -327,6 +322,14 @@ public class UserController {
 		// If user does not exist, create it
 		if (facebookUser == null){
 			userRepository.save(requestedUser);
+
+			Iterable<Invitation> invitations = invitationRepository.findByEmail(requestedUser.getEmail());
+			for (Invitation invitation : invitations) {
+				invitation.setInvited(requestedUser);
+				invitationRepository.save(invitation);
+			}
+
+
 			hashMap.put("user", requestedUser);
 			// Object to JSON String
 			String jsonString = mapper.writeValueAsString(hashMap);

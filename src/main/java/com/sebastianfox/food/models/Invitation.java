@@ -14,11 +14,9 @@ public class Invitation {
     private String email;
 
     @OneToOne(fetch = FetchType.LAZY)
-    //@MapsId
     private User invited;
 
     @OneToOne(fetch = FetchType.LAZY)
-    //@MapsId
     private User invitedBy;
 
     public Integer getId() {
