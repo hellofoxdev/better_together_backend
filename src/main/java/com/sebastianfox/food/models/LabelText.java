@@ -3,6 +3,7 @@ package com.sebastianfox.food.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity // This tells Hibernate to make a table out of this class
@@ -31,6 +32,12 @@ public class LabelText {
             this.setText(lblEnglish);
         }
     }
+
+    @JsonIgnore
+    private Date updated;
+
+    @JsonIgnore
+    private Date created;
 
     /**
      * Getter and Setter
@@ -74,5 +81,33 @@ public class LabelText {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        created = now;
+        updated = now;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

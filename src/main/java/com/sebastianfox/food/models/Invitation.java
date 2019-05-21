@@ -1,6 +1,9 @@
 package com.sebastianfox.food.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.Date;
 
 @SuppressWarnings("unused")
 @Entity
@@ -18,6 +21,12 @@ public class Invitation {
 
     @OneToOne(fetch = FetchType.LAZY)
     private User invitedBy;
+
+    @JsonIgnore
+    private Date updated;
+
+    @JsonIgnore
+    private Date created;
 
     public Integer getId() {
         return id;
@@ -49,6 +58,34 @@ public class Invitation {
 
     public void setInvitedBy(User invitedBy) {
         this.invitedBy = invitedBy;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        created = now;
+        updated = now;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
 }

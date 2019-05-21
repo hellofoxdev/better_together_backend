@@ -1,6 +1,11 @@
 package com.sebastianfox.food.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.Date;
 
 
 @SuppressWarnings("unused")
@@ -11,12 +16,29 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="location_id")
     private Integer id;
+
     private String name;
+
     private Float langitude;
+
     private Float longitude;
+
     private String Street;
+
     private Integer zip;
+
     private String city;
+
+//    @OneToOne(mappedBy = "location")
+//    @JsonIgnoreProperties({"location"})
+//    @JsonManagedReference
+//    private Event event;
+
+    @JsonIgnore
+    private Date updated;
+
+    @JsonIgnore
+    private Date created;
 
     public Integer getId() {
         return id;
@@ -72,5 +94,41 @@ public class Location {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+//    public Event getEvent() {
+//        return event;
+//    }
+//
+//    public void setEvent(Event event) {
+//        this.event = event;
+//    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        created = now;
+        updated = now;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

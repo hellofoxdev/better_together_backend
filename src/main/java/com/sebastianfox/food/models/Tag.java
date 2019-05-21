@@ -1,8 +1,10 @@
 package com.sebastianfox.food.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 
@@ -17,7 +19,6 @@ public class Tag {
 
     private String name;
 
-
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
@@ -29,6 +30,12 @@ public class Tag {
     )
     @JsonIgnoreProperties({"tags"})
     private List<Event> events;
+
+    @JsonIgnore
+    private Date updated;
+
+    @JsonIgnore
+    private Date created;
 
     /**
      * Getter and Setter
@@ -70,5 +77,33 @@ public class Tag {
         if (event.getTags().contains(this)) {
             event.removeTag(this);
         }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        created = now;
+        updated = now;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

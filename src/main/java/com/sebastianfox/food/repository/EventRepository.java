@@ -1,7 +1,7 @@
 package com.sebastianfox.food.repository;
 
 import com.sebastianfox.food.models.Event;
-import com.sebastianfox.food.models.Location;
+//import com.sebastianfox.food.models.Location;
 import com.sebastianfox.food.models.User;
 import org.springframework.data.repository.CrudRepository;
 
@@ -14,7 +14,7 @@ import java.util.List;
 public interface EventRepository extends CrudRepository<Event, Long> {
 
     List<Event> findByOwner(User user);
-    List<Event> findByLocation(Location location);
+//    List<Event> findByLocation(Location location);
 
     Event findById(Integer id);
 

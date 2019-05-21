@@ -1,19 +1,34 @@
 package com.sebastianfox.food.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sebastianfox.food.enums.EventTypes;
+import com.sebastianfox.food.enums.PrivacyTypes;
 import com.sebastianfox.food.models.Event;
 import com.sebastianfox.food.models.User;
 import com.sebastianfox.food.repository.EventRepository;
 import com.sebastianfox.food.repository.UserRepository;
 import org.json.JSONException;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import java.io.DataInput;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 @Controller    // This means that this class is a Controller
@@ -94,21 +109,144 @@ public class EventController {
 
     /**
      *
-     * @param eventData JSON data from App
+     * @param data JSON data from App
      * @return http response
      * @throws JSONException exception
      */
     @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/createNewEvent", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createNewEventByEvent(@RequestHeader(value="xxx") String xxx, @RequestBody HashMap<String, Object> eventData) throws JSONException {
-        int i = 5;
-        String xy = xxx;
-        System.out.println(xy);
+    @RequestMapping(path = "/createNewEventByString", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> createNewEventByString(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException, ParseException {
 
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
-        Event event = (Event) eventData.get("event");
-        return new ResponseEntity<>("jsonString", HttpStatus.CREATED);
+
+        // Initialize new event
+        Event event = new Event();
+
+        if (data.get("privacyTypes") == null || data.get("eventType") == null || data.get("user_id") == null || data.get("text") == null || data.get("date") == null){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        // Find owner of event by given id
+        User user = userRepository.findById((Integer) data.get("user_id"));
+        if (user == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+        // Event type
+        event.setEventType(EventTypes.valueOf(data.get("eventType").toString().toUpperCase()));
+
+        // Event privacy
+        event.setPrivacyTypes(PrivacyTypes.valueOf(data.get("privacyTypes").toString().toUpperCase()));
+
+        // Title of event
+        event.setText(data.get("text").toString());
+
+        // Owner of event
+        event.setOwner(user);
+
+        // Date
+        String dateString = data.get("date").toString();
+        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
+        event.setDate(date);
+
+        // Optional values
+        // max. Participants
+        if (data.get("maxParticipants") != null) {
+            event.setMaxParticipants((Integer) data.get("maxParticipants"));
+        }
+
+        // description of event
+        if (data.get("description") != null) {
+            event.setDescription(data.get("description").toString());
+        }
+
+        eventRepository.save(event);
+
+        // Successful register
+        hashMap.put("event", event);
+        // Object to JSON String
+        String jsonString = mapper.writeValueAsString(hashMap);
+        // Return to App
+        return new ResponseEntity<>(jsonString, HttpStatus.CREATED);
+    }
+
+    /**
+     *
+     * @param data JSON data from App
+     * @return http response
+     * @throws JSONException exception
+     */
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(path = "/createNewEventByObject", method = RequestMethod.POST, consumes = {"application/json"})
+//    public ResponseEntity<Object> createNewEventByObject(@RequestBody Event data) throws JSONException, IOException, ParseException {
+    public ResponseEntity<Object> createNewEventByObject(@RequestBody HashMap<String, HashMap> data) throws JSONException, IOException, ParseException {
+//        Event event = new Event();
+
+
+        ObjectMapper mapper = new ObjectMapper();
+        HashMap<String,Object> hashMap = new HashMap<>();
+        HashMap result = data.get("result");
+        String eventString = mapper.writeValueAsString(result.get("event"));
+        Event event = mapper.readValue(eventString, Event.class);
+//        Event event2 = (Event) result.get("event");
+        User dbUser = userRepository.findById((Integer) result.get("user"));
+        event.setOwner(dbUser);;
+
+        eventRepository.save(event);
+
+//        userRepository.save(dbUser);
+
+        // Successful register
+        hashMap.put("event", event);
+        // Object to JSON String
+        String jsonString = mapper.writeValueAsString(hashMap);
+        // Return to App
+        return new ResponseEntity<>(jsonString, HttpStatus.CREATED);
+    }
+
+    /**
+     *
+     * @param data JSON data from App
+     * @return http response
+     * @throws JSONException exception
+     */
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(path = "/attendToEvent", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> attendToEvent(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        HashMap<String,Object> hashMap = new HashMap<>();
+
+        if (data.get("user_id") == null || data.get("event_id") == null){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        // Find event by given id
+        Event event = eventRepository.findById((Integer) data.get("event_id"));
+        if (event == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        // Find owner of event by given id
+        User user = userRepository.findById((Integer) data.get("user_id"));
+        if (user == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        if (!event.hasAvailableSpaces()){
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+
+        event.addMember(user);
+        userRepository.save(user);
+        eventRepository.save(event);
+
+        // Successful register
+        hashMap.put("event", event);
+        // Object to JSON String
+        String jsonString = mapper.writeValueAsString(hashMap);
+        // Return to App
+        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
     }
 
     /**
@@ -139,5 +277,22 @@ public class EventController {
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
         return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+    }
+
+    public static void copyNonNullProperties(Object src, Object target) {
+        BeanUtils.copyProperties(src, target, getNullPropertyNames(src));
+    }
+
+    public static String[] getNullPropertyNames (Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<String>();
+        for(java.beans.PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
     }
 }

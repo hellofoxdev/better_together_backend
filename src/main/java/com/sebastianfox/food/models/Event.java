@@ -1,14 +1,13 @@
 package com.sebastianfox.food.models;
 
+//import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sebastianfox.food.enums.EventTypes;
 import com.sebastianfox.food.enums.PrivacyTypes;
-import com.sebastianfox.food.utils.CRUDDetails;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity
@@ -22,7 +21,10 @@ public class Event {
 
     private String text;
 
-    private String location;
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "locationId", referencedColumnName = "location_id")
+//    @JsonBackReference
+//    private Location location;
 
     private Date date;
 
@@ -32,9 +34,11 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventTypes eventType = EventTypes.OTHERS;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
     @JoinColumn(name = "owner_id", nullable=false)
-    @JsonIgnoreProperties({"events", "ownedEvents"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends"})
+//    @JsonBackReference(value="event-owner")
     private User owner;
 
     private String description;
@@ -47,17 +51,8 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents"})
-    private Set<User> members = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents"})
-    private Set<User> memberRequests = new HashSet<>();
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends"})
+    private List<User> members;
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
@@ -67,9 +62,19 @@ public class Event {
             mappedBy = "events")
     @JsonIgnoreProperties({"events"})
     private Set<Tag> tags = new HashSet<>();
+
+    @JsonIgnore
     private Date updated;
+
+    @JsonIgnore
     private Date created;
 
+    /**
+     * Constructor
+     */
+    public Event() {
+        this.members = new ArrayList<>();
+    }
 
     //   Getter and Setter
 
@@ -89,13 +94,13 @@ public class Event {
         this.text = text;
     }
 
-    public String getLocation() {
-        return location;
-    }
+//    public Location getLocation() {
+//        return location;
+//    }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+//    public void setLocation(Location location) {
+//        this.location = location;
+//    }
 
     public Date getDate() {
         return date;
@@ -130,21 +135,53 @@ public class Event {
         if (!owner.getOwnedEvents().contains(this)){
             owner.addOwnedEvent(this);
         }
+        if (!owner.getEvents().contains(this)){
+            owner.addEvent(this);
+        }
     }
 
-    public Set<User> getMembers() {
+    public List<User> getMembers() {
         return members;
     }
 
-    public void setMembers(Set<User> members) {
+    public void setMembers(List<User> members) {
         this.members = members;
     }
 
     public void addMember(User member) {
-        this.members.add(member);
-        if (!member.getEvents().contains(this)) {
-            member.addEvent(this);
+       // if (this.hasAvailableSpaces()) {
+
+        boolean isAddable = false;
+
+        switch(this.getPrivacyTypes()){
+            case FRIENDS:
+                isAddable = this.getOwner().getAcceptedFriends().contains(member);
+                break;
+            case FRIENDSOFFRIENDS:
+                if (this.getOwner().getAcceptedFriends().contains(member) || this.getOwner().getFriendsOfAllFriends().contains(member)) {
+                    isAddable = true;
+                }
+                break;
+            case PRIVATE:
+                // Einladungssystem fehlt noch
+                isAddable = false;
+                break;
+            case PUBLIC:
+                // blocked User Handling kann noch eingebaut werden
+                isAddable = true;
+                break;
+            default:
+                isAddable = false;
         }
+
+        if (isAddable) {
+
+            this.members.add(member);
+            if (!member.getEvents().contains(this)) {
+                member.addEvent(this);
+            }
+        }
+       // }
     }
 
     public void removeMember(User member) {
@@ -163,39 +200,6 @@ public class Event {
             this.members.remove(member);
         }
     }
-
-    public Set<User> getMemberRequests() {
-        return memberRequests;
-    }
-
-    public void setMemberRequests(Set<User> memberRequests) {
-        this.memberRequests = memberRequests;
-    }
-
-    public void addMemberRequest(User memberRequest) {
-        this.memberRequests.add(memberRequest);
-        if (!memberRequest.getEvents().contains(this)) {
-            memberRequest.addEvent(this);
-        }
-    }
-
-    public void removeMemberRequest(User memberRequest) {
-        this.memberRequests.remove(memberRequest);
-        if (memberRequest.getEvents().contains(this)) {
-            memberRequest.removeEvent(this);
-        }
-    }
-
-    public void clearMemberRequests() {
-        for( User memberRequest: memberRequests )
-        {
-            if (memberRequest.getEvents().contains(this)) {
-                memberRequest.removeEvent(this);
-            }
-            this.memberRequests.remove(memberRequest);
-        }
-    }
-
 
     public Set<Tag> getTags() {
         return tags;
@@ -218,8 +222,6 @@ public class Event {
             tag.removeEvent(this);
         }
     }
-
-
 
     public void clearTags() {
         for( Tag tag: tags )
@@ -251,6 +253,10 @@ public class Event {
         this.privacyTypes = privacyTypes;
     }
 
+    public boolean hasAvailableSpaces() {
+        return this.getMembers().size() < this.getMaxParticipants();
+    }
+
     @PreUpdate
     public void preUpdate() {
         updated = new Date();
@@ -258,8 +264,23 @@ public class Event {
 
     @PrePersist
     public void prePersist() {
-        Date now = new Date();
-        created = now;
-        updated = now;
+        updated = new Date();
+        created = new Date();
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }
