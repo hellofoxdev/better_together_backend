@@ -1,86 +1,102 @@
 package com.sebastianfox.food.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity // This tells Hibernate to make a table out of this class
-@Table(name="users")
+@Table(name = "users")
+//@JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2"})
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="user_id")
+    @Column(name = "user_id")
     private Integer id;
 
-    /** personal data */
-    private String username;
+    /**
+     * personal data
+     */
+    private String userName;
 
     private String email;
 
-    private String firstname;
+    private String name;
 
-    private String lastname;
+    private String description;
 
-    @Column(columnDefinition = "LONGTEXT")
-    private String imageString;
-
-    /** Security - Password and Salt */
+    /**
+     * Security - Password and Salt
+     */
     @JsonIgnore
     private byte[] password;
 
     @JsonIgnore
     private byte[] salt;
 
-    /** Facebook - id/mail/socialAcoount */
-    private long facebookId;
+    /**
+     * Facebook - id/mail/socialAcoount
+     */
+    private long facebookAccountId;
 
-    private String facebookMail;
+    private String facebookAccountEmail;
 
-    private String facebookUsername;
+    private String facebookAccountUserName;
 
-    private boolean socialMediaAccount = false;
+    private boolean facebookAccount = false;
 
-    /** Events - list of evets and ownd events */
+    /**
+     * Events - list of evets and ownd events
+     */
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             })
-    @JoinTable(name="users_events",
-            joinColumns=@JoinColumn(name="userId"),
-            inverseJoinColumns=@JoinColumn(name="eventId")
+    @JoinTable(name = "users_events",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "eventId")
     )
-    @JsonIgnoreProperties({"owner", "members", "memberRequests"})
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
     private List<Event> events;
 
-    @OneToMany(mappedBy="owner")
-    @JsonIgnoreProperties({"owner", "members", "memberRequests"})
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    @JsonProperty("ownedEvents")
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+//    @JsonManagedReference(value="event-owner")
     private List<Event> ownedEvents;
 
-    /** Friends - List of friends (both sides) */
-    @ManyToMany
-    @JoinTable(name="friends",
-            joinColumns=@JoinColumn(name="friendId"),
-            inverseJoinColumns=@JoinColumn(name="favoriteId")
+    @OneToMany(mappedBy = "friend1")
+    @JsonIgnore
+//    @JsonProperty("friendshipsFriend1")
+//    @JsonIgnoreProperties({ "friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "acceptedFriends" })
+    @JsonManagedReference(value="friend1")
+    private List<Friendship> friendshipsFriend1;
 
-    )
-    private List<User> friends;
+    @OneToMany(mappedBy = "friend2")
+    @JsonIgnore
+//    @JsonProperty("friendshipsFriend2")
+//    @JsonIgnoreProperties({ "friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "acceptedFriends" })
+    @JsonManagedReference(value="friend2")
+    private List<Friendship> friendshipsFriend2;
 
-    @ManyToMany
-    private List<User> friendOf;
+    @JsonIgnore
+    private Date updated;
+
+    @JsonIgnore
+    private Date created;
 
     /**
      * Constructor
      */
-    public User(){
-        this.friendOf = new ArrayList<>();
-        this.friends = new ArrayList<>();
+    public User() {
+        this.friendshipsFriend1 = new ArrayList<>();
+        this.friendshipsFriend2 = new ArrayList<>();
         this.events = new ArrayList<>();
         this.ownedEvents = new ArrayList<>();
     }
@@ -91,43 +107,16 @@ public class User {
      * @param appUser data transformed as user from app
      */
     public void mergeDataFromApp(User appUser) {
-        this.username = appUser.username;
+        this.userName = appUser.userName;
         this.email = appUser.email;
-        this.lastname = appUser.lastname;
-        this.firstname = appUser.firstname;
-        this.imageString = appUser.imageString;
-
-        /* Not ncessary?
-        for (Event event : appUser.getEvents()) {
-            if (!this.events.contains(event)){
-                this.events.add(event);
-            }
-        }
-
-        for (Event event : appUser.getOwnedEvents()) {
-            if (!this.ownedEvents.contains(event)){
-                this.ownedEvents.add(event);
-            }
-        }
-
-        for (User friend : appUser.getFriends()) {
-            if (!this.friends.contains(friend)){
-                this.friends.add(friend);
-            }
-        }
-
-        for (User friendOf : appUser.getFriendOf()) {
-            if (!this.friendOf.contains(friendOf)){
-                this.friendOf.add(friendOf);
-            }
-        }
-        */
+        this.name = appUser.name;
     }
 
     // Getter and Setter methods
 
     /**
      * Get id
+     *
      * @return Integer id
      */
     public Integer getId() {
@@ -136,6 +125,7 @@ public class User {
 
     /**
      * Set id
+     *
      * @param id of user
      */
     public void setId(Integer id) {
@@ -143,19 +133,29 @@ public class User {
     }
 
     /**
-     * Get username
-     * @return String username of user
+     * Get userName
+     *
+     * @return String userName of user
      */
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
      * Get email
+     *
      * @return String email of user
      */
     public String getEmail() {
@@ -168,6 +168,7 @@ public class User {
 
     /**
      * Get password
+     *
      * @return String password of user (ignored by JSON)
      */
     @JsonIgnore
@@ -177,6 +178,7 @@ public class User {
 
     /**
      * Set password
+     *
      * @param password of user
      */
     @JsonProperty
@@ -186,6 +188,7 @@ public class User {
 
     /**
      * Get salt
+     *
      * @return byte[] salt of user
      */
     @JsonIgnore
@@ -198,62 +201,294 @@ public class User {
         this.salt = salt;
     }
 
-    public String getFacebookMail() {
-        return facebookMail;
+    public String getFacebookAccountEmail() {
+        return facebookAccountEmail;
     }
 
-    public void setFacebookMail(String facebookMail) {
-        this.facebookMail = facebookMail;
+    public void setFacebookAccountEmail(String facebookAccountEmail) {
+        this.facebookAccountEmail = facebookAccountEmail;
     }
 
-    public String getFacebookUsername() {
-        return facebookUsername;
+    public String getFacebookAccountUserName() {
+        return facebookAccountUserName;
     }
 
-    public void setFacebookUsername(String facebookUsername) {
-        this.facebookUsername = facebookUsername;
+    public void setFacebookAccountUserName(String facebookAccountUserName) {
+        this.facebookAccountUserName = facebookAccountUserName;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public boolean isFacebookAccount() {
+        return facebookAccount;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public void setFacebookAccount(boolean facebookAccount) {
+        this.facebookAccount = facebookAccount;
     }
 
-    public String getLastname() {
-        return lastname;
+    /**
+     * Get Facebook ID
+     *
+     * @return facebookAccountId
+     */
+    public long getFacebookAccountId() {
+        return facebookAccountId;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-    public boolean isSocialMediaAccount() {
-        return socialMediaAccount;
-    }
-
-    public void setSocialMediaAccount(boolean socialMediaAccount) {
-        this.socialMediaAccount = socialMediaAccount;
+    /**
+     * Set Facebook id
+     *
+     * @param facebookAccountId id
+     */
+    public void setFacebookAccountId(long facebookAccountId) {
+        this.facebookAccountId = facebookAccountId;
     }
 
-    public void addEvent(Event event){
-        this.events.add(event);
-        if (!event.getMembers().contains(this)){
-            event.addMember(this);
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /* *************************
+     *  Friendship Handling
+     ************************ */
+
+    @JsonIgnore
+    public List<Friendship> getFriendshipsFriend1() {
+        return friendshipsFriend1;
+    }
+
+    public void setFriendshipsFriend1(List<Friendship> friendshipsFriend1) {
+        this.friendshipsFriend1 = friendshipsFriend1;
+    }
+
+    /**
+     * add friend to array of friends
+     *
+     * @param friendship user
+     */
+    public void addFriendshipFriend1(Friendship friendship) {
+        if (!this.friendshipsFriend1.contains(friendship)) {
+            this.friendshipsFriend1.add(friendship);
         }
     }
 
-    public void removeEvent(Event event){
-        this.events.remove(event);
-        if (event.getMembers().contains(this)) {
-            event.removeMember(this);
+    public void removeFriendshipFriend1(Friendship friendship) {
+        this.friendshipsFriend1.remove(friendship);
+    }
+
+    @JsonIgnore
+    public List<Friendship> getFriendshipsFriend2() {
+        return friendshipsFriend2;
+    }
+
+    public void setFriendshipsFriend2(List<Friendship> friendshipsFriend2) {
+        this.friendshipsFriend2 = friendshipsFriend2;
+    }
+
+    /**
+     * add friend to array of friends
+     *
+     * @param friendship user
+     */
+    public void addFriendshipFriend2(Friendship friendship) {
+        if (!this.friendshipsFriend2.contains(friendship)) {
+            this.friendshipsFriend2.add(friendship);
         }
     }
 
-    public void removeOwnedEventFromList(Event event) {
-        this.events.remove(event);
+    public void removeFriendshipFriend2(Friendship friendship) {
+        this.friendshipsFriend2.remove(friendship);
     }
+
+    // accepted friends / friendships
+    @JsonIgnore
+    @JsonProperty("acceptedFriendships")
+    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "acceptedFriendships", "open", "accepted"})
+    public List<Friendship> getAcceptedFriendships() {
+        Iterator<Friendship> friendshipIterator1 = friendshipsFriend1.iterator();
+        List<Friendship> acceptedFriendships = new ArrayList<>(this.getAcceptedFriendshipRequestsByFriendType(friendshipIterator1));
+        Iterator<Friendship> friendshipIterator2 = friendshipsFriend2.iterator();
+        acceptedFriendships.addAll(this.getAcceptedFriendshipRequestsByFriendType(friendshipIterator2));
+        return acceptedFriendships;
+    }
+
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents", "acceptedFriends", "open", "accepted"})
+    public List<User> getAcceptedFriends() {
+        Iterator<Friendship> friendshipIterator = this.getAcceptedFriendships().iterator();
+
+        List<User> friendshipRequester = new ArrayList<>();
+
+        return this.getFriendList(friendshipIterator);
+    }
+
+    // get opened friendshiprequests by others / requesters
+    @JsonIgnore
+    public List<Friendship> getFriendshipRequestsByFriend() {
+        Iterator<Friendship> friendshipIterator = friendshipsFriend2.iterator();
+        return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
+    }
+
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents", "acceptedFriends", "open", "accepted"})
+    public List<User> getRequestedFriendsByFriend() {
+        Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByFriend().iterator();
+        return this.getFriendList(friendshipIterator);
+    }
+
+    // get my opend eFriendshiprequests to others / my (future) friends
+    @JsonIgnore
+    public List<Friendship> getFriendshipRequestsByCurrentUser() {
+        Iterator<Friendship> friendshipIterator = friendshipsFriend1.iterator();
+        return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
+    }
+
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents", "acceptedFriends", "open", "accepted"})
+    public List<User> getRequestedFriendsByCurrentUser() {
+        Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByCurrentUser().iterator();
+        return this.getFriendList(friendshipIterator);
+    }
+
+    // methode to determine friend from friendship
+    @JsonIgnore
+    public List<User> getFriendList(Iterator<Friendship> friendshipIterator) {
+        List<User> friendshipRequester = new ArrayList<>();
+        while (friendshipIterator.hasNext()) {
+            Friendship friendshipByIterator = friendshipIterator.next();
+            User friend1ByIterator = friendshipByIterator.getFriend1();
+            User friend2ByIterator = friendshipByIterator.getFriend2();
+            if (friend1ByIterator == this) {
+                friendshipRequester.add(friend2ByIterator);
+            } else {
+                friendshipRequester.add(friend1ByIterator);
+            }
+        }
+        return friendshipRequester;
+    }
+
+    // methode to get opened and not accepted friendships
+    @JsonIgnore
+    public List<Friendship> getOpenFriendshipRequestsByFriendType(Iterator<Friendship> friendshipIterator) {
+        List<Friendship> friendshipRequests = new ArrayList<>();
+        while (friendshipIterator.hasNext()) {
+            Friendship friendshipByIterator = friendshipIterator.next();
+            if (friendshipByIterator.isOpen() && !friendshipByIterator.isAccepted()) {
+                friendshipRequests.add(friendshipByIterator);
+            }
+        }
+        return friendshipRequests;
+    }
+
+    // methode to get opened and not accepted friendships
+    @JsonIgnore
+    public List<Friendship> getAcceptedFriendshipRequestsByFriendType(Iterator<Friendship> friendshipIterator) {
+        List<Friendship> friendshipRequests = new ArrayList<>();
+        while (friendshipIterator.hasNext()) {
+            Friendship friendshipByIterator = friendshipIterator.next();
+            if (friendshipByIterator.isAccepted()) {
+                friendshipRequests.add(friendshipByIterator);
+            }
+        }
+        return friendshipRequests;
+    }
+
+    public Friendship createAndAcceptFriendship(User friend) {
+        Friendship friendship;
+        // Check wether requested friendship already is requested by friend2
+        if (this.getRequestedFriendsByFriend().contains(friend)) {
+            for (Friendship friendshipToTest : this.getFriendshipRequestsByFriend()) {
+                if (friendshipToTest.getFriend1() == friend) {
+                    friendshipToTest.setAccepted(true);
+                    friendshipToTest.setOpen();
+                    return friendshipToTest;
+                }
+            }
+        }
+        // Check wether requested friendship already exists and is accepted
+        else if (this.getAcceptedFriends().contains(friend)) {
+            for (Friendship friendshipToTest : this.getFriendshipRequestsByFriend()) {
+                if (friendshipToTest.getFriend2() == friend) {
+                    return friendshipToTest;
+                }
+                if (friendshipToTest.getFriend1() == friend) {
+                    return friendshipToTest;
+                }
+            }
+        }
+        // Check wether requested friendship already is requested by friend1
+        else if (this.getRequestedFriendsByCurrentUser().contains(friend)) {
+            for (Friendship friendshipToTest : this.getFriendshipRequestsByCurrentUser()) {
+                if (friendshipToTest.getFriend2() == friend) {
+                    return friendshipToTest;
+                }
+            }
+        }
+        // Create new Friendship
+        else {
+            friendship = new Friendship(this, friend);
+            return friendship;
+        }
+        return null;
+    }
+
+    public Friendship declineAndDeleteFriendship(User friend){
+        if (this.getAcceptedFriends().contains(friend)) {
+            for (Friendship friendshipToTest : this.getAcceptedFriendships()) {
+                if (friendshipToTest.getFriend2() == friend) {
+                    friendshipToTest.setAccepted(false);
+                    this.removeFriendshipFriend1(friendshipToTest);
+                    friend.removeFriendshipFriend2(friendshipToTest);
+                    return friendshipToTest;
+                }
+                if (friendshipToTest.getFriend1() == friend) {
+                    this.removeFriendshipFriend2(friendshipToTest);
+                    friend.removeFriendshipFriend1(friendshipToTest);
+                    return friendshipToTest;
+                }
+            }
+        } else if (this.getRequestedFriendsByCurrentUser().contains(friend)) {
+            for (Friendship friendshipToTest : this.getFriendshipRequestsByCurrentUser()) {
+                if (friendshipToTest.getFriend2() == friend) {
+                    this.removeFriendshipFriend1(friendshipToTest);
+                    friend.removeFriendshipFriend2(friendshipToTest);
+                    return friendshipToTest;
+                }
+            }
+        } else if (this.getRequestedFriendsByFriend().contains(friend)) {
+            for (Friendship friendshipToTest : this.getFriendshipRequestsByFriend()) {
+                if (friendshipToTest.getFriend1() == friend) {
+                    this.removeFriendshipFriend2(friendshipToTest);
+                    friend.removeFriendshipFriend1(friendshipToTest);
+                    return friendshipToTest;
+                }
+            }
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public List<User> getFriendsOfAFriend(User friend) {
+        List<User> friendsOfAFriend = new ArrayList<>(friend.getAcceptedFriends());
+        friendsOfAFriend.removeAll(this.getAcceptedFriends());
+        friendsOfAFriend.remove(this);
+        return friendsOfAFriend;
+    }
+
+    @JsonIgnore
+    public List<User> getFriendsOfAllFriends() {
+        List<User> friendsOfAllFriend = new ArrayList<>();
+        for (User friend : this.getAcceptedFriends()){
+            List<User> friendsOfAFriend = new ArrayList<>(this.getFriendsOfAFriend(friend));
+            friendsOfAFriend.removeAll(friendsOfAllFriend);
+            friendsOfAllFriend.addAll(friendsOfAFriend);
+        }
+        return friendsOfAllFriend;
+    }
+
+    /* *************************
+     *  Event Handling
+     ************************ */
 
     public List<Event> getEvents() {
         return events;
@@ -261,6 +496,20 @@ public class User {
 
     public void setEvents(List<Event> events) {
         this.events = events;
+    }
+
+    public void addEvent(Event event) {
+        this.events.add(event);
+        if (!event.getMembers().contains(this)) {
+            event.addMember(this);
+        }
+    }
+
+    public void removeEvent(Event event) {
+        this.events.remove(event);
+        if (event.getMembers().contains(this)) {
+            event.removeMember(this);
+        }
     }
 
     public List<Event> getOwnedEvents() {
@@ -271,88 +520,58 @@ public class User {
         this.ownedEvents = ownedEvents;
     }
 
+    public void removeOwnedEventFromList(Event event) {
+        this.events.remove(event);
+    }
+
     public void addOwnedEvent(Event ownedEvent) {
         this.ownedEvents.add(ownedEvent);
-    }
-
-    public String getImageString() {
-        return imageString;
-    }
-
-    public void setImageString(String imageString) {
-        this.imageString = imageString;
-    }
-
-    public List<User> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(List<User> friends) {
-        this.friends = friends;
-    }
-
-    /**
-     * add friend to array of friends
-     * @param friend user
-     */
-    public void addFriend(User friend){
-        if (this.friends.contains(friend)) {
-            this.friends.add(friend);
-        }
-        if (!friend.getFriendOf().contains(this)){
-            friend.addFriendOf(this);
+        if (!ownedEvent.getMembers().contains(this)){
+            ownedEvent.addMember(this);
         }
     }
 
-    /**
-     * Get friends of
-     * @return list of firends the current user is
-     */
-    public List<User> getFriendsOfFriends() {
-        List<User> friendsOfFriends = new ArrayList<>();
-        for (User friend : friends) {
-            friendsOfFriends.add(friend);
-            friendsOfFriends.addAll(friend.getFriends());
-        }
-        return friendsOfFriends;
+    @JsonIgnore
+    public List<Event> getPublicEventsOfAUser(){
+        return null;
     }
 
-    /**
-     * Get friends of
-     * @return list of firends the current user is
-     */
-    public List<User> getFriendOf() {
-        return friendOf;
+    @JsonIgnore
+    public List<Event> getEventsOfAllFriends(){
+        return null;
     }
 
-    public void setFriendOf(List<User> friendOf) {
-        this.friendOf = friendOf;
+    @JsonIgnore
+    public List<Event> getEventsOfAllFriendsOfFriends(){
+        return null;
     }
 
-
-    public void addFriendOf(User friendOf){
-        if (!this.friendOf.contains(friendOf)) {
-            this.friendOf.add(friendOf);
-        }
-        if (!friendOf.getFriends().contains(this)){
-            friendOf.addFriend(this);
-        }
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
     }
 
-    /**
-     * Get Facebook ID
-     * @return facebookId
-     */
-    public long getFacebookId() {
-        return facebookId;
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        created = now;
+        updated = now;
     }
 
-    /**
-     * Set Facebook id
-     * @param facebookId id
-     */
-    public void setFacebookId(long facebookId) {
-        this.facebookId = facebookId;
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }
 

@@ -14,8 +14,8 @@ import org.springframework.data.repository.CrudRepository;
 @SuppressWarnings("unused")
 public interface UserRepository extends CrudRepository<User, Long> {
     User findByEmail(String email);
-    User findByUsername(String name);
-    User findByFacebookMail(String mail);
-    User findByFacebookId(Long id);
+    User findByUserName(String name);
+    User findByFacebookAccountEmail(String mail);
+    User findByFacebookAccountId(Long id);
     User findById(Integer id);
 }
