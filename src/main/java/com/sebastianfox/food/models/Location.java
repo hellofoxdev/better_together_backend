@@ -1,8 +1,6 @@
 package com.sebastianfox.food.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -28,11 +26,6 @@ public class Location {
     private Integer zip;
 
     private String city;
-
-//    @OneToOne(mappedBy = "location")
-//    @JsonIgnoreProperties({"location"})
-//    @JsonManagedReference
-//    private Event event;
 
     @JsonIgnore
     private Date updated;
