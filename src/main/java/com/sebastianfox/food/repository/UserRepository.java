@@ -3,6 +3,8 @@ package com.sebastianfox.food.repository;
 import com.sebastianfox.food.models.User;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.UUID;
+
 //import hello.User;
 
 //import java.util.List;
@@ -17,5 +19,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
     User findByUserName(String name);
     User findByFacebookAccountEmail(String mail);
     User findByFacebookAccountId(Long id);
-    User findById(Integer id);
+    User findById(UUID id);
 }

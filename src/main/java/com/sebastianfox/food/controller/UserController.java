@@ -85,7 +85,7 @@ public class UserController {
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/reloadUser", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> reloadUser(@RequestBody HashMap<String, Integer> data) throws JSONException, IOException {
+    public ResponseEntity<Object> reloadUser(@RequestBody HashMap<String, UUID> data) throws JSONException, IOException {
 
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -334,7 +334,7 @@ public class UserController {
      * @throws IOException   exception
      */
     @RequestMapping(path = "/createAndAcceptFriendRequest", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createAndAcceptFriendRequest(@RequestBody HashMap<String, Integer> data) throws JSONException, IOException {
+    public ResponseEntity<Object> createAndAcceptFriendRequest(@RequestBody HashMap<String, UUID> data) throws JSONException, IOException {
 
         // create hashmap for response
         HashMap<String, Object> responseHash = new HashMap<>();
@@ -368,7 +368,7 @@ public class UserController {
      * @throws IOException   exception
      */
     @RequestMapping(path = "/declineAndDeleteFriendship", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> declineAndDeleteFriendship(@RequestBody HashMap<String, Integer> data) throws JSONException, IOException {
+    public ResponseEntity<Object> declineAndDeleteFriendship(@RequestBody HashMap<String, UUID> data) throws JSONException, IOException {
 
         // create hashmap for response
         HashMap<String, Object> responseHash = new HashMap<>();

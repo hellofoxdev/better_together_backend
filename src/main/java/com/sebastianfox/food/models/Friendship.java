@@ -3,18 +3,22 @@ package com.sebastianfox.food.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 @Entity
 @Table(name="friendships")
 public class Friendship {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="friendship_id")
-    private Integer id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)", name = "friendship_id")
+    private UUID id;
 
     @ManyToOne()
     @JoinColumn(name = "friend1_id", nullable=false)
@@ -56,11 +60,11 @@ public class Friendship {
         }
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

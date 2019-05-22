@@ -1,12 +1,10 @@
 package com.sebastianfox.food.models;
 
 import com.fasterxml.jackson.annotation.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity // This tells Hibernate to make a table out of this class
@@ -15,9 +13,10 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "user_id")
-    private Integer id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)", name = "user_id")
+    private UUID id;
 
     /**
      * personal data
@@ -131,7 +130,7 @@ public class User {
      *
      * @return Integer id
      */
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -140,7 +139,7 @@ public class User {
      *
      * @param id of user
      */
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -318,7 +317,7 @@ public class User {
     // accepted friends / friendships
     @JsonIgnore
     @JsonProperty("acceptedFriendships")
-    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
     public List<Friendship> getAcceptedFriendships() {
         Iterator<Friendship> friendshipIterator1 = friendshipsFriend1.iterator();
         List<Friendship> acceptedFriendships = new ArrayList<>(this.getAcceptedFriendshipRequestsByFriendType(friendshipIterator1));
@@ -327,7 +326,7 @@ public class User {
         return acceptedFriendships;
     }
 
-    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
     public List<User> getAcceptedFriends() {
         Iterator<Friendship> friendshipIterator = this.getAcceptedFriendships().iterator();
 
@@ -343,7 +342,7 @@ public class User {
         return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
     }
 
-    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
     public List<User> getRequestedFriendsByFriend() {
         Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByFriend().iterator();
         return this.getFriendList(friendshipIterator);
@@ -356,7 +355,7 @@ public class User {
         return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
     }
 
-    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
+    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
     public List<User> getRequestedFriendsByCurrentUser() {
         Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByCurrentUser().iterator();
         return this.getFriendList(friendshipIterator);
@@ -565,7 +564,7 @@ public class User {
     }
 
     public void removeInterestedEvent(Event interestedEvent) {
-        this.interestedEvents.remove(interestedEvents);
+        this.interestedEvents.remove(interestedEvent);
         if (interestedEvent.getInteresteds().contains(this)) {
             interestedEvent.removeInterested(this);
         }

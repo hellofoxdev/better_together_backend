@@ -25,10 +25,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 @Controller    // This means that this class is a Controller
@@ -88,7 +85,7 @@ public class EventController {
     public ResponseEntity<Object> loadUserEvents(@RequestBody HashMap<String, Object> userData) throws JSONException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
-        User appUser = userRepository.findById((Integer) userData.get("id"));
+        User appUser = userRepository.findById((UUID) userData.get("id"));
 
         // check if user is available in database
         if (appUser == null) {
@@ -129,7 +126,7 @@ public class EventController {
         }
 
         // Find owner of event by given id
-        User user = userRepository.findById((Integer) data.get("user_id"));
+        User user = userRepository.findById((UUID) data.get("user_id"));
         if (user == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
@@ -193,7 +190,7 @@ public class EventController {
         //String eventString = mapper.writeValueAsString(result.get("event"));
         //Event event = mapper.readValue(eventString, Event.class);
 //        Event event2 = (Event) result.get("event");
-        User dbUser = userRepository.findById((Integer) data.get("user"));
+        User dbUser = userRepository.findById((UUID) data.get("user"));
         event.setOwner(dbUser);;
 
         eventRepository.save(event);
@@ -230,7 +227,7 @@ public class EventController {
             dbEvent.mergeDataFromOtherInstance(event);
         } else {
             dbEvent = event;
-            User dbUser = userRepository.findById((Integer) data.get("user"));
+            User dbUser = userRepository.findById((UUID) data.get("user"));
             dbEvent.setOwner(dbUser);
         }
 
@@ -262,13 +259,13 @@ public class EventController {
         }
 
         // Find event by given id
-        Event event = eventRepository.findById((Integer) data.get("event_id"));
+        Event event = eventRepository.findById((UUID) data.get("event_id"));
         if (event == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
         // Find owner of event by given id
-        User user = userRepository.findById((Integer) data.get("user_id"));
+        User user = userRepository.findById((UUID) data.get("user_id"));
         if (user == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
@@ -338,7 +335,7 @@ public class EventController {
         HashMap<String,Object> hashMap = new HashMap<>();
 
         // Get Data
-        Integer id = (Integer) eventData.get("id");
+        UUID id = (UUID) eventData.get("id");
         Event event = eventRepository.findById(id);
 
         // Check if event is available in database
