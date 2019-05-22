@@ -62,14 +62,26 @@ public class User {
             joinColumns = @JoinColumn(name = "userId"),
             inverseJoinColumns = @JoinColumn(name = "eventId")
     )
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
     private List<Event> events;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     @JsonProperty("ownedEvents")
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
 //    @JsonManagedReference(value="event-owner")
     private List<Event> ownedEvents;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
+    @JoinTable(name = "users_interestedEvents",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "eventId")
+    )
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+    private List<Event> interestedEvents;
 
     @OneToMany(mappedBy = "friend1")
     @JsonIgnore
@@ -106,7 +118,7 @@ public class User {
     /**
      * @param appUser data transformed as user from app
      */
-    public void mergeDataFromApp(User appUser) {
+    public void mergeDataFromOtherInstance(User appUser) {
         this.userName = appUser.userName;
         this.email = appUser.email;
         this.name = appUser.name;
@@ -306,7 +318,7 @@ public class User {
     // accepted friends / friendships
     @JsonIgnore
     @JsonProperty("acceptedFriendships")
-    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "acceptedFriendships", "open", "accepted"})
+    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
     public List<Friendship> getAcceptedFriendships() {
         Iterator<Friendship> friendshipIterator1 = friendshipsFriend1.iterator();
         List<Friendship> acceptedFriendships = new ArrayList<>(this.getAcceptedFriendshipRequestsByFriendType(friendshipIterator1));
@@ -315,7 +327,7 @@ public class User {
         return acceptedFriendships;
     }
 
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents", "acceptedFriends", "open", "accepted"})
+    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
     public List<User> getAcceptedFriends() {
         Iterator<Friendship> friendshipIterator = this.getAcceptedFriendships().iterator();
 
@@ -331,7 +343,7 @@ public class User {
         return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
     }
 
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents", "acceptedFriends", "open", "accepted"})
+    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
     public List<User> getRequestedFriendsByFriend() {
         Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByFriend().iterator();
         return this.getFriendList(friendshipIterator);
@@ -344,7 +356,7 @@ public class User {
         return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
     }
 
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents", "acceptedFriends", "open", "accepted"})
+    @JsonIgnoreProperties({"friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "interestedEvents", "acceptedFriendships", "open", "accepted"})
     public List<User> getRequestedFriendsByCurrentUser() {
         Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByCurrentUser().iterator();
         return this.getFriendList(friendshipIterator);
@@ -490,6 +502,8 @@ public class User {
      *  Event Handling
      ************************ */
 
+    // Events
+
     public List<Event> getEvents() {
         return events;
     }
@@ -512,6 +526,8 @@ public class User {
         }
     }
 
+    // Owned Events
+
     public List<Event> getOwnedEvents() {
         return ownedEvents;
     }
@@ -528,6 +544,30 @@ public class User {
         this.ownedEvents.add(ownedEvent);
         if (!ownedEvent.getMembers().contains(this)){
             ownedEvent.addMember(this);
+        }
+    }
+
+    // Interested Events
+
+    public List<Event> getInterestedEvents() {
+        return interestedEvents;
+    }
+
+    public void setInterestedEvents(List<Event> interestedEvents) {
+        this.interestedEvents = interestedEvents;
+    }
+
+    public void addInterestedEvent(Event interestedEvent) {
+        this.interestedEvents.add(interestedEvent);
+        if (!interestedEvent.getInteresteds().contains(this)) {
+            interestedEvent.addInterested(this);
+        }
+    }
+
+    public void removeInterestedEvent(Event interestedEvent) {
+        this.interestedEvents.remove(interestedEvents);
+        if (interestedEvent.getInteresteds().contains(this)) {
+            interestedEvent.removeInterested(this);
         }
     }
 

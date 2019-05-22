@@ -29,7 +29,7 @@ public class Event {
     private Date date;
 
     @Enumerated(EnumType.STRING)
-    private PrivacyTypes privacyTypes = PrivacyTypes.FRIENDS;
+    private PrivacyTypes privacyType = PrivacyTypes.FRIENDS;
 
     @Enumerated(EnumType.STRING)
     private EventTypes eventType = EventTypes.OTHERS;
@@ -37,7 +37,7 @@ public class Event {
     @ManyToOne(cascade = CascadeType.ALL)
     @JsonIgnore
     @JoinColumn(name = "owner_id", nullable=false)
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds"})
 //    @JsonBackReference(value="event-owner")
     private User owner;
 
@@ -51,8 +51,17 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds"})
     private List<User> members;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "events")
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds"})
+    private List<User> interesteds;
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
@@ -74,6 +83,7 @@ public class Event {
      */
     public Event() {
         this.members = new ArrayList<>();
+        this.interesteds = new ArrayList<>();
     }
 
     //   Getter and Setter
@@ -140,6 +150,8 @@ public class Event {
         }
     }
 
+    // Members
+
     public List<User> getMembers() {
         return members;
     }
@@ -149,39 +161,10 @@ public class Event {
     }
 
     public void addMember(User member) {
-       // if (this.hasAvailableSpaces()) {
-
-        boolean isAddable = false;
-
-        switch(this.getPrivacyTypes()){
-            case FRIENDS:
-                isAddable = this.getOwner().getAcceptedFriends().contains(member);
-                break;
-            case FRIENDSOFFRIENDS:
-                if (this.getOwner().getAcceptedFriends().contains(member) || this.getOwner().getFriendsOfAllFriends().contains(member)) {
-                    isAddable = true;
-                }
-                break;
-            case PRIVATE:
-                // Einladungssystem fehlt noch
-                isAddable = false;
-                break;
-            case PUBLIC:
-                // blocked User Handling kann noch eingebaut werden
-                isAddable = true;
-                break;
-            default:
-                isAddable = false;
-        }
-
-        if (isAddable) {
-
             this.members.add(member);
             if (!member.getEvents().contains(this)) {
                 member.addEvent(this);
             }
-        }
-       // }
     }
 
     public void removeMember(User member) {
@@ -198,6 +181,40 @@ public class Event {
                 member.removeEvent(this);
             }
             this.members.remove(member);
+        }
+    }
+
+    // Interested
+
+    public List<User> getInteresteds() {
+        return interesteds;
+    }
+
+    public void setInteresteds(List<User> interesteds) {
+        this.interesteds = interesteds;
+    }
+
+    public void addInterested(User interested) {
+        this.interesteds.add(interested);
+        if (!interested.getInterestedEvents().contains(this)) {
+            interested.addInterestedEvent(this);
+        }
+    }
+
+    public void removeInterested(User interested) {
+        this.interesteds.remove(interested);
+        if (interested.getInterestedEvents().contains(this)) {
+            interested.removeInterestedEvent(this);
+        }
+    }
+
+    public void clearInteresteds() {
+        for( User interested: interesteds )
+        {
+            if (interested.getInterestedEvents().contains(this)) {
+                interested.removeInterestedEvent(this);
+            }
+            this.interesteds.remove(interested);
         }
     }
 
@@ -245,12 +262,12 @@ public class Event {
         this.eventType = eventType;
     }
 
-    public PrivacyTypes getPrivacyTypes() {
-        return privacyTypes;
+    public PrivacyTypes getPrivacyType() {
+        return privacyType;
     }
 
-    public void setPrivacyTypes(PrivacyTypes privacyTypes) {
-        this.privacyTypes = privacyTypes;
+    public void setPrivacyTypes(PrivacyTypes privacyType) {
+        this.privacyType = privacyType;
     }
 
     public boolean hasAvailableSpaces() {
@@ -282,5 +299,23 @@ public class Event {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    //  Methods
+
+    /**
+     * @param otherEvent data transformed as user from app
+     */
+    public void mergeDataFromOtherInstance(Event otherEvent) {
+        this.text = otherEvent.getText();
+        this.description = otherEvent.getDescription();
+        this.eventType = otherEvent.getEventType();
+        this.privacyType = otherEvent.getPrivacyType();
+        this.maxParticipants = otherEvent.getMaxParticipants();
+    }
+
+    public void changeOwner(User newOwner){
+        this.getOwner().getOwnedEvents().remove(this);
+        this.setOwner(newOwner);
     }
 }
