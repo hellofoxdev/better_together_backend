@@ -213,11 +213,14 @@ public class EventController {
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/createOrUpdateEventByObject", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> updateEventByObject(@RequestBody HashMap<String, Object> data) throws JSONException, IOException, ParseException {
+    public ResponseEntity<Object> createOrUpdateEventByObject(@RequestBody HashMap<String, Object> data) throws JSONException, IOException, ParseException {
 
         HashMap<String,Object> hashMap = new HashMap<>();
 
         Object excludedData = data.get("event");
+        Object excludedIds = data.get("ids");
+        HashMap ids = mapper.convertValue(excludedIds, HashMap.class);
+
 
         Event event = mapper.convertValue(excludedData, Event.class);
         Event dbEvent;
@@ -227,7 +230,9 @@ public class EventController {
             dbEvent.mergeDataFromOtherInstance(event);
         } else {
             dbEvent = event;
-            User dbUser = userRepository.findById((UUID) data.get("user"));
+            Object test = ids.get("user_id");
+            UUID uuid = mapper.convertValue(test, UUID.class);
+            User dbUser = userRepository.findById(uuid);
             dbEvent.setOwner(dbUser);
         }
 
