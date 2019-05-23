@@ -37,9 +37,8 @@ public class Event {
     private EventTypes eventType = EventTypes.OTHERS;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JsonIgnore
     @JoinColumn(name = "owner_id", nullable=false)
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
 //    @JsonBackReference(value="event-owner")
     private User owner;
 
@@ -53,7 +52,7 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
     private List<User> members;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -62,7 +61,7 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
     private List<User> interesteds;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -138,6 +137,7 @@ public class Event {
         this.maxParticipants = maxParticipants;
     }
 
+//    @JsonIgnore
     public User getOwner() {
         return owner;
     }
