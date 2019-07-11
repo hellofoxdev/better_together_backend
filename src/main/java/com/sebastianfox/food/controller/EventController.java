@@ -6,29 +6,24 @@ import com.sebastianfox.food.enums.EventTypes;
 import com.sebastianfox.food.enums.PrivacyTypes;
 import com.sebastianfox.food.models.Event;
 import com.sebastianfox.food.models.User;
-import com.sebastianfox.food.repository.EventRepository;
-import com.sebastianfox.food.repository.UserRepository;
+import com.sebastianfox.food.repository.Event.EventRepository;
+import com.sebastianfox.food.repository.User.UserRepository;
 import org.json.JSONException;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityManager;
-import java.io.DataInput;
+import javax.persistence.*;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @SuppressWarnings("unused")
 @Controller    // This means that this class is a Controller
+@PersistenceContext
 @RequestMapping(path = "/api/event") // This means URL's start with /api (after Application path)
 public class EventController {
 
@@ -63,7 +58,6 @@ public class EventController {
 
         Iterable<Event> events = eventRepository.findAll();
 
-        ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
 
         // Object to JSON String
@@ -83,7 +77,7 @@ public class EventController {
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/loadUserEvents", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> loadUserEvents(@RequestBody HashMap<String, Object> userData) throws JSONException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
+
         HashMap<String,Object> hashMap = new HashMap<>();
         User appUser = userRepository.findById((UUID) userData.get("id"));
 
@@ -115,7 +109,6 @@ public class EventController {
     @RequestMapping(path = "/createNewEventByString", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> createNewEventByString(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException, ParseException {
 
-        ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
 
         // Initialize new event
@@ -177,25 +170,17 @@ public class EventController {
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/createNewEventByObject", method = RequestMethod.POST, consumes = {"application/json"})
 //    public ResponseEntity<Object> createNewEventByObject(@RequestBody Event data) throws JSONException, IOException, ParseException {
-    public ResponseEntity<Object> createNewEventByObject(@RequestBody HashMap<String,Object> data) throws JSONException, IOException, ParseException {
+    public ResponseEntity<Object> createNewEventByObject(@RequestBody HashMap<String,Object> data) throws JSONException, IOException {
 
         HashMap<String,Object> hashMap = new HashMap<>();
 
-
         Object excludedData = data.get("event");
-       // Event event2 = (Event) data.get("result");
         Event event = mapper.convertValue(excludedData, Event.class);
 
-
-        //String eventString = mapper.writeValueAsString(result.get("event"));
-        //Event event = mapper.readValue(eventString, Event.class);
-//        Event event2 = (Event) result.get("event");
         User dbUser = userRepository.findById((UUID) data.get("user"));
-        event.setOwner(dbUser);;
+        event.setOwner(dbUser);
 
         eventRepository.save(event);
-
-//        userRepository.save(dbUser);
 
         // Successful register
         hashMap.put("event", event);
@@ -213,25 +198,22 @@ public class EventController {
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/createOrUpdateEventByObject", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createOrUpdateEventByObject(@RequestBody HashMap<String, Object> data) throws JSONException, IOException, ParseException {
+    public ResponseEntity<Object> createOrUpdateEventByObject(@RequestBody HashMap<String, Object> data) throws JSONException, IOException {
 
         HashMap<String,Object> hashMap = new HashMap<>();
 
         Object excludedData = data.get("event");
         Object excludedIds = data.get("ids");
         HashMap ids = mapper.convertValue(excludedIds, HashMap.class);
-
-
-        Event event = mapper.convertValue(excludedData, Event.class);
+        Event appEvent = mapper.convertValue(excludedData, Event.class);
         Event dbEvent;
 
-        if (event.getId() != null) {
-            dbEvent = eventRepository.findById(event.getId());
-            dbEvent.mergeDataFromOtherInstance(event);
+        if (appEvent.getId() != null) {
+            dbEvent = eventRepository.findById(appEvent.getId());
+            dbEvent.mergeDataFromOtherInstance(appEvent);
         } else {
-            dbEvent = event;
-            Object test = ids.get("user_id");
-            UUID uuid = mapper.convertValue(test, UUID.class);
+            dbEvent = appEvent;
+            UUID uuid = mapper.convertValue(ids.get("user_id"), UUID.class);
             User dbUser = userRepository.findById(uuid);
             dbEvent.setOwner(dbUser);
         }
@@ -256,7 +238,6 @@ public class EventController {
     @RequestMapping(path = "/attendToEvent", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> attendToEvent(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
 
-        ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
 
         if (data.get("user_id") == null || data.get("event_id") == null){
@@ -335,8 +316,8 @@ public class EventController {
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/reloadEventById", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> reloadEventById(@RequestBody HashMap<String, Object> eventData) throws JSONException, IOException {
+
         // Preperation
-        ObjectMapper mapper = new ObjectMapper();
         HashMap<String,Object> hashMap = new HashMap<>();
 
         // Get Data
@@ -354,4 +335,43 @@ public class EventController {
         // Return to App
         return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
     }
+
+    /**
+     *
+     * @param data JSON data from App
+     * @return http response
+     * @throws JSONException exception
+*/
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(path = "/getAllAvailableEventsForUser", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> getAllAvailableEventsForUser(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
+
+        HashMap<String, Object> responseHash = new HashMap<>();
+
+        if (data.get("user_id") == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        UUID uuid = mapper.convertValue(data.get("user_id"), UUID.class);
+
+        // Find owner of event by given id
+        User user = userRepository.findById(uuid);
+        if (user == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        List<Event> events = new ArrayList<>();
+        events.addAll(eventRepository.findByPrivacyType(PrivacyTypes.PUBLIC));
+        events.addAll(user.getEventsOfAllConnections());
+
+        // Object to JSON String
+        responseHash.put("events", events);
+
+        // Object to JSON String
+        String jsonString = mapper.writeValueAsString(responseHash);
+
+        // Return to app (successful)
+        return new ResponseEntity<>(jsonString, HttpStatus.OK);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sebastianfox.food.models;
 
 import com.fasterxml.jackson.annotation.*;
+import com.sebastianfox.food.enums.PrivacyTypes;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -21,32 +22,43 @@ public class User {
     /**
      * personal data
      */
+    @Column(name = "user_name", nullable = false)
     private String userName;
 
+    @Column(name = "email", nullable = false)
     private String email;
 
+    @Column(name = "name", nullable = true)
     private String name;
 
+    @Column(name = "description", nullable = true)
     private String description;
 
     /**
      * Security - Password and Salt
      */
     @JsonIgnore
+    @Column(name = "password", nullable = true)
     private byte[] password;
 
     @JsonIgnore
+    @Column(name = "salt", nullable = true)
     private byte[] salt;
 
     /**
      * Facebook - id/mail/socialAcoount
      */
+
+    @Column(name = "facebook_account_id", nullable = true)
     private long facebookAccountId;
 
+    @Column(name = "facebook_account_email", nullable = true)
     private String facebookAccountEmail;
 
+    @Column(name = "facebook_user_name", nullable = true)
     private String facebookAccountUserName;
 
+    @Column(name = "facebook_account", nullable = true)
     private boolean facebookAccount = false;
 
     /**
@@ -58,15 +70,15 @@ public class User {
                     CascadeType.MERGE
             })
     @JoinTable(name = "users_events",
-            joinColumns = @JoinColumn(name = "userId"),
-            inverseJoinColumns = @JoinColumn(name = "eventId")
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend", "location", "members", "interesteds", "interestedEvents"})
     private List<Event> events;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    @JsonProperty("ownedEvents")
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+    @JsonProperty("owned_events")
+    @JsonIgnoreProperties({"friendships1", "text", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend", "location", "owner", "members", "interesteds", "interestedEvents"})
 //    @JsonManagedReference(value="event-owner")
     private List<Event> ownedEvents;
 
@@ -75,11 +87,11 @@ public class User {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             })
-    @JoinTable(name = "users_interestedEvents",
-            joinColumns = @JoinColumn(name = "userId"),
-            inverseJoinColumns = @JoinColumn(name = "eventId")
+    @JoinTable(name = "users_interested_events",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_d")
     )
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend"})
+    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend", "location"})
     private List<Event> interestedEvents;
 
     @OneToMany(mappedBy = "friend1")
@@ -481,6 +493,7 @@ public class User {
     @JsonIgnore
     public List<User> getFriendsOfAFriend(User friend) {
         List<User> friendsOfAFriend = new ArrayList<>(friend.getAcceptedFriends());
+        // check if this removal is necessary
         friendsOfAFriend.removeAll(this.getAcceptedFriends());
         friendsOfAFriend.remove(this);
         return friendsOfAFriend;
@@ -491,10 +504,18 @@ public class User {
         List<User> friendsOfAllFriend = new ArrayList<>();
         for (User friend : this.getAcceptedFriends()){
             List<User> friendsOfAFriend = new ArrayList<>(this.getFriendsOfAFriend(friend));
+            // check if this removal is necessary
             friendsOfAFriend.removeAll(friendsOfAllFriend);
             friendsOfAllFriend.addAll(friendsOfAFriend);
         }
         return friendsOfAllFriend;
+    }
+
+    @JsonIgnore
+    public List<User> getAllAvailableConnections() {
+        List<User> availableConnections = new ArrayList<>(this.getAcceptedFriends());
+        availableConnections.addAll(getFriendsOfAllFriends());
+        return availableConnections;
     }
 
     /* *************************
@@ -571,14 +592,31 @@ public class User {
     }
 
     @JsonIgnore
-    public List<Event> getPublicEventsOfAUser(){
-        return null;
+    public List<Event> getEventsOfAUserByPrivacyTypes(User user, PrivacyTypes[] privacyTypes){
+        List<Event> events = new ArrayList<>();
+        for (Event event : user.getEvents()){
+            if (Arrays.asList(privacyTypes).contains(event.getPrivacyType())){
+                events.add(event);
+            }
+        }
+        return events;
     }
 
+
     @JsonIgnore
-    public List<Event> getEventsOfAllFriends(){
-        return null;
+    public List<Event> getEventsOfAllConnections(){
+        List<Event> events = new ArrayList<>();
+        for (User user : getAcceptedFriends()) {
+            PrivacyTypes[] privacyTypes = {PrivacyTypes.FRIENDS, PrivacyTypes.FRIENDSOFFRIENDS, PrivacyTypes.PUBLIC};
+            events.addAll(this.getEventsOfAUserByPrivacyTypes(user, privacyTypes));
+        }
+        for (User user : getFriendsOfAllFriends()) {
+            PrivacyTypes[] privacyTypes = {PrivacyTypes.FRIENDSOFFRIENDS, PrivacyTypes.PUBLIC};
+            events.addAll(this.getEventsOfAUserByPrivacyTypes(user, privacyTypes));
+        }
+        return events;
     }
+
 
     @JsonIgnore
     public List<Event> getEventsOfAllFriendsOfFriends(){

@@ -1,5 +1,6 @@
-package com.sebastianfox.food.repository;
+package com.sebastianfox.food.repository.Event;
 
+import com.sebastianfox.food.enums.PrivacyTypes;
 import com.sebastianfox.food.models.Event;
 //import com.sebastianfox.food.models.Location;
 import com.sebastianfox.food.models.User;
@@ -18,5 +19,6 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 //    List<Event> findByLocation(Location location);
 
     Event findById(UUID id);
+    List<Event> findByPrivacyType(PrivacyTypes privacyType);
 
 }

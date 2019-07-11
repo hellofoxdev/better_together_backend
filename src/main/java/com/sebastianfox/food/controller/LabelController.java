@@ -2,7 +2,7 @@ package com.sebastianfox.food.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebastianfox.food.models.LabelText;
-import com.sebastianfox.food.repository.LabelRepository;
+import com.sebastianfox.food.repository.Label.LabelRepository;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
