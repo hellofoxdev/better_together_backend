@@ -1,4 +1,4 @@
-package com.sebastianfox.food.repository;
+package com.sebastianfox.food.repository.Invitation;
 
 import com.sebastianfox.food.models.Invitation;
 import com.sebastianfox.food.models.User;

@@ -1,4 +1,4 @@
-package com.sebastianfox.food.repository;
+package com.sebastianfox.food.repository.Tag;
 
 import com.sebastianfox.food.models.Tag;
 import org.springframework.data.repository.CrudRepository;

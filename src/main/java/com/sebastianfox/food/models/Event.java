@@ -1,6 +1,7 @@
 package com.sebastianfox.food.models;
 
 //import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sebastianfox.food.enums.EventTypes;
@@ -23,27 +24,31 @@ public class Event {
 
     private String text;
 
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "locationId", referencedColumnName = "location_id")
-//    @JsonBackReference
-//    private Location location;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "locationId", referencedColumnName = "location_id")
+    @JsonBackReference
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "event"})
+    private Location location;
 
     private Date date;
 
     @Enumerated(EnumType.STRING)
-    private PrivacyTypes privacyType = PrivacyTypes.FRIENDS;
+    @Column(name = "privacy_type")
+    private PrivacyTypes privacyType;
 
     @Enumerated(EnumType.STRING)
-    private EventTypes eventType = EventTypes.OTHERS;
+//    @Column(name = "event_type", nullable = true)
+    private EventTypes eventType;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "owner_id", nullable=false)
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
+    @JsonIgnoreProperties({"events", "text", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
 //    @JsonBackReference(value="event-owner")
     private User owner;
 
     private String description;
 
+//    @Column(name = "max_participants", nullable = true)
     private Integer maxParticipants;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -52,7 +57,7 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
     private List<User> members;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -61,7 +66,7 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
+    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
     private List<User> interesteds;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -71,6 +76,7 @@ public class Event {
             },
             mappedBy = "events")
     @JsonIgnoreProperties({"events"})
+    @JsonIgnore
     private Set<Tag> tags = new HashSet<>();
 
     @JsonIgnore
@@ -85,6 +91,8 @@ public class Event {
     public Event() {
         this.members = new ArrayList<>();
         this.interesteds = new ArrayList<>();
+        eventType = EventTypes.OTHERS;
+        privacyType = PrivacyTypes.FRIENDS;
     }
 
     //   Getter and Setter

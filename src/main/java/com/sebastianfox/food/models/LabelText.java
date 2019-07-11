@@ -10,7 +10,8 @@ import java.util.Date;
 @Table(name="label_texts")
 public class LabelText {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="label_text_id")
     private Integer id;
 

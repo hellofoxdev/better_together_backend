@@ -1,4 +1,4 @@
-package com.sebastianfox.food.repository;
+package com.sebastianfox.food.repository.Friendship;
 
 import com.sebastianfox.food.models.Friendship;
 import org.springframework.data.repository.CrudRepository;
