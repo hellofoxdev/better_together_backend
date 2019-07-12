@@ -580,7 +580,7 @@ public class UserController {
         System.out.println("List of available Users (Testdata)");
         System.out.println("#####################################");
         for (User user : users) {
-            System.out.println(user.getId().toString().concat(": ").concat(user.getUserName()));
+            System.out.println(user.getId().toString());
         }
 
 
