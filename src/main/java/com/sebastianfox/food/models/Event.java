@@ -24,8 +24,9 @@ public class Event {
 
     private String text;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "locationId", referencedColumnName = "location_id")
+//    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "location_id", referencedColumnName = "location_id")
     @JsonBackReference
     @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "event"})
     private Location location;
@@ -113,13 +114,18 @@ public class Event {
         this.text = text;
     }
 
-//    public Location getLocation() {
-//        return location;
-//    }
+    public Location getLocation() {
+        return location;
+    }
 
-//    public void setLocation(Location location) {
-//        this.location = location;
-//    }
+    public void setLocation(Location location) {
+        this.location = location;
+
+        this.location = location;
+        if (!location.getEvents().contains(this)){
+            location.addEvent(this);
+        }
+    }
 
     public Date getDate() {
         return date;

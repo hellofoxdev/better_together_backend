@@ -78,7 +78,7 @@ public class User {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     @JsonProperty("owned_events")
-    @JsonIgnoreProperties({"friendships1", "text", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend", "location", "owner", "members", "interesteds", "interestedEvents"})
+    @JsonIgnoreProperties({"text", "date", "privacyType", "eventType", "description", "maxParticipants", "location", "owner", "members", "interesteds", "tags", "updated", "created"})
 //    @JsonManagedReference(value="event-owner")
     private List<Event> ownedEvents;
 

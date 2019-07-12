@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @SuppressWarnings("unused")
@@ -28,15 +30,23 @@ public class Location {
 
     private String city;
 
-    @OneToOne(mappedBy = "location")
+//    @OneToOne(mappedBy = "location")
+    @OneToMany(mappedBy="location")
     @JsonIgnoreProperties({"event"})
-    private Event event;
+    private List<Event> events;
 
     @JsonIgnore
     private Date updated;
 
     @JsonIgnore
     private Date created;
+
+    /**
+     * Constructor
+     */
+    public Location() {
+        this.events = new ArrayList<>();
+    }
 
     public Integer getId() {
         return id;
@@ -94,12 +104,20 @@ public class Location {
         this.city = city;
     }
 
-    public Event getEvent() {
-        return event;
+//    public Event getEvent() {
+//        return event;
+//    }
+
+//    public void setEvent(Event event) {
+//        this.event = event;
+//    }
+
+    public List<Event> getEvents() {
+        return events;
     }
 
-    public void setEvent(Event event) {
-        this.event = event;
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
 
     @PreUpdate
@@ -128,5 +146,12 @@ public class Location {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public void addEvent(Event event) {
+        this.events.add(event);
+        if (event.getLocation() != this){
+            event.setLocation(this);
+        }
     }
 }
