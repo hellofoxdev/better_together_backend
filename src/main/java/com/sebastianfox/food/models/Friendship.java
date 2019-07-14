@@ -22,13 +22,15 @@ public class Friendship {
 
     @ManyToOne()
     @JoinColumn(name = "friend1_id", nullable=false)
-    @JsonIgnoreProperties({ "friend1", "friend2", "friendships1", "friendships2", "events", "ownedEvents" })
+//    @JsonIgnoreProperties({ "friend1", "friend2", "friendships1", "friendships2", "events", "ownedEvents" })
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     @JsonBackReference(value="friend1")
     private User friend1;
 
     @ManyToOne()
     @JoinColumn(name = "friend2_id", nullable=false)
-    @JsonIgnoreProperties({ "friend1", "friend2", "friendships1", "friendships2", "events", "ownedEvents" })
+//    @JsonIgnoreProperties({ "friend1", "friend2", "friendships1", "friendships2", "events", "ownedEvents" })
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     @JsonBackReference(value="friend2")
     private User friend2;
 

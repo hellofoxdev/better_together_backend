@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 //import hello.User;
@@ -22,13 +23,9 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
     User findByFacebookAccountEmail(String mail);
     User findByFacebookAccountId(Long id);
     User findById(UUID id);
+    List<User> findAllByDeletedIsFalse();
 
-//    @Modifying
-//    @Query(value = "insert into Users (name, age, email, status) values (:name, :age, :email, :status)",
-//            nativeQuery = true)
-//    void insertUser(@Param("name") String name, @Param("age") Integer age,
-//                    @Param("status") Integer status, @Param("email") String email);
-//
+
     @Query(value = "SELECT * FROM Users u WHERE u.email = :email",
             nativeQuery = true)
     User findUserByMyFancyMail(

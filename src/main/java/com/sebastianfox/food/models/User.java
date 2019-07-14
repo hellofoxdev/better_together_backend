@@ -19,6 +19,9 @@ public class User {
     @Column(columnDefinition = "BINARY(16)", name = "user_id")
     private UUID id;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
     /**
      * personal data
      */
@@ -28,37 +31,36 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "name", nullable = true)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "description", nullable = true)
+    @Column(name = "description")
     private String description;
 
     /**
      * Security - Password and Salt
      */
     @JsonIgnore
-    @Column(name = "password", nullable = true)
+    @Column(name = "password")
     private byte[] password;
 
     @JsonIgnore
-    @Column(name = "salt", nullable = true)
+    @Column(name = "salt")
     private byte[] salt;
 
     /**
      * Facebook - id/mail/socialAcoount
      */
-
-    @Column(name = "facebook_account_id", nullable = true)
+    @Column(name = "facebook_account_id")
     private long facebookAccountId;
 
-    @Column(name = "facebook_account_email", nullable = true)
+    @Column(name = "facebook_account_email")
     private String facebookAccountEmail;
 
-    @Column(name = "facebook_user_name", nullable = true)
+    @Column(name = "facebook_user_name")
     private String facebookAccountUserName;
 
-    @Column(name = "facebook_account", nullable = true)
+    @Column(name = "facebook_account")
     private boolean facebookAccount = false;
 
     /**
@@ -73,13 +75,11 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend", "location", "members", "interesteds", "interestedEvents"})
+    @JsonIgnoreProperties({"text", "date", "privacyType", "eventType", "description", "maxParticipants", "location", "owner", "members", "interesteds", "tags", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<Event> events;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    @JsonProperty("owned_events")
-    @JsonIgnoreProperties({"text", "date", "privacyType", "eventType", "description", "maxParticipants", "location", "owner", "members", "interesteds", "tags", "updated", "created"})
-//    @JsonManagedReference(value="event-owner")
+    @JsonIgnoreProperties({"text", "date", "privacyType", "eventType", "description", "maxParticipants", "location", "owner", "members", "interesteds", "tags", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<Event> ownedEvents;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -91,13 +91,18 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_d")
     )
-    @JsonIgnoreProperties({"friendships1", "friendships2", "events", "ownedEvents", "interestedEvents", "acceptedFriends", "getFriendshipRequestsByCurrentUser", "getFriendshipRequestsByFriend", "location"})
+    @JsonIgnoreProperties({"text", "date", "privacyType", "eventType", "description", "maxParticipants", "location", "owner", "members", "interesteds", "tags", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<Event> interestedEvents;
 
+
+    /**
+     * Friendships
+     */
     @OneToMany(mappedBy = "friend1")
     @JsonIgnore
 //    @JsonProperty("friendshipsFriend1")
 //    @JsonIgnoreProperties({ "friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "acceptedFriends" })
+    @JsonIgnoreProperties({"friend1", "friend2", "open", "accepted"})
     @JsonManagedReference(value="friend1")
     private List<Friendship> friendshipsFriend1;
 
@@ -105,6 +110,7 @@ public class User {
     @JsonIgnore
 //    @JsonProperty("friendshipsFriend2")
 //    @JsonIgnoreProperties({ "friendshipsFriend1", "friendshipsFriend2", "events", "ownedEvents", "acceptedFriends" })
+    @JsonIgnoreProperties({"friend1", "friend2", "open", "accepted"})
     @JsonManagedReference(value="friend2")
     private List<Friendship> friendshipsFriend2;
 
@@ -328,8 +334,8 @@ public class User {
 
     // accepted friends / friendships
     @JsonIgnore
-    @JsonProperty("acceptedFriendships")
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+//    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "friend1", "friend2", "open", "accepted"})
     public List<Friendship> getAcceptedFriendships() {
         Iterator<Friendship> friendshipIterator1 = friendshipsFriend1.iterator();
         List<Friendship> acceptedFriendships = new ArrayList<>(this.getAcceptedFriendshipRequestsByFriendType(friendshipIterator1));
@@ -338,7 +344,8 @@ public class User {
         return acceptedFriendships;
     }
 
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+//    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "friend1", "friend2", "open", "accepted"})
     public List<User> getAcceptedFriends() {
         Iterator<Friendship> friendshipIterator = this.getAcceptedFriendships().iterator();
 
@@ -354,7 +361,8 @@ public class User {
         return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
     }
 
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+//    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "friend1", "friend2", "open", "accepted"})
     public List<User> getRequestedFriendsByFriend() {
         Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByFriend().iterator();
         return this.getFriendList(friendshipIterator);
@@ -367,8 +375,9 @@ public class User {
         return this.getOpenFriendshipRequestsByFriendType(friendshipIterator);
     }
 
-    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
-    public List<User> getRequestedFriendsByCurrentUser() {
+//    @JsonIgnoreProperties({"acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "events", "ownedEvents", "interestedEvents", "open", "accepted"})
+        @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser", "friend1", "friend2", "open", "accepted"})
+        public List<User> getRequestedFriendsByCurrentUser() {
         Iterator<Friendship> friendshipIterator = this.getFriendshipRequestsByCurrentUser().iterator();
         return this.getFriendList(friendshipIterator);
     }
@@ -557,7 +566,7 @@ public class User {
     }
 
     public void removeOwnedEventFromList(Event event) {
-        this.events.remove(event);
+        this.ownedEvents.remove(event);
     }
 
     public void addOwnedEvent(Event ownedEvent) {
@@ -617,6 +626,13 @@ public class User {
         return events;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 
     @JsonIgnore
     public List<Event> getEventsOfAllFriendsOfFriends(){
