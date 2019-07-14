@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 
 public class UserService {
-//    UserRepository userRepository = new UserRepository() {
-//    }
 
     private Authenticator authenticator = new Authenticator();
     private ObjectMapper mapper = new ObjectMapper();
@@ -24,17 +22,6 @@ public class UserService {
         return user;
     }
 
-    public void printSomething(String text) {
-        System.out.println(text);
-    }
-
-    public User doSomeFancyUserStuff(User user) {
-        user.setUserName("wow return");
-        return user;
-    }
-    public void doSomeFancyUserStuffWithoutReturn(User user) {
-        user.setUserName("wow");
-    }
 
     public void addEvent(User user, Event event) {
         user.addEvent(event);

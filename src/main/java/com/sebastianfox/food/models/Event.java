@@ -22,13 +22,20 @@ public class Event {
     @Column(columnDefinition = "BINARY(16)", name = "event_id")
     private UUID id;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name = "open", nullable = false)
+    private boolean open = true;
+
     private String text;
 
 //    @OneToOne(cascade = CascadeType.ALL)
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "location_id", referencedColumnName = "location_id")
     @JsonBackReference
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "event"})
+//    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "event"})
+    @JsonIgnoreProperties({"event"})
     private Location location;
 
     private Date date;
@@ -38,18 +45,18 @@ public class Event {
     private PrivacyTypes privacyType;
 
     @Enumerated(EnumType.STRING)
-//    @Column(name = "event_type", nullable = true)
+    @Column(name = "event_type")
     private EventTypes eventType;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "owner_id", nullable=false)
-    @JsonIgnoreProperties({"events", "text", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
-//    @JsonBackReference(value="event-owner")
+//    @JsonIgnoreProperties({"events", "text", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private User owner;
 
     private String description;
 
-//    @Column(name = "max_participants", nullable = true)
+    @Column(name = "max_participants")
     private Integer maxParticipants;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -58,7 +65,8 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
+//    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<User> members;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -67,7 +75,8 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
+//    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<User> interesteds;
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -93,7 +102,7 @@ public class Event {
         this.members = new ArrayList<>();
         this.interesteds = new ArrayList<>();
         eventType = EventTypes.OTHERS;
-        privacyType = PrivacyTypes.FRIENDS;
+        privacyType = PrivacyTypes.PUBLIC;
     }
 
     //   Getter and Setter
@@ -119,8 +128,6 @@ public class Event {
     }
 
     public void setLocation(Location location) {
-        this.location = location;
-
         this.location = location;
         if (!location.getEvents().contains(this)){
             location.addEvent(this);
@@ -191,7 +198,7 @@ public class Event {
     }
 
     public void clearMembers() {
-        for( User member: members )
+        for( User member: this.members )
         {
             if (member.getEvents().contains(this)) {
                 member.removeEvent(this);
@@ -201,7 +208,6 @@ public class Event {
     }
 
     // Interested
-
     public List<User> getInteresteds() {
         return interesteds;
     }
@@ -301,6 +307,26 @@ public class Event {
         created = new Date();
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isOpen() {
+        return open;
+    }
+
+    public void setOpen(boolean open) {
+        this.open = open;
+    }
+
+    public void setPrivacyType(PrivacyTypes privacyType) {
+        this.privacyType = privacyType;
+    }
+
     public Date getUpdated() {
         return updated;
     }
@@ -317,7 +343,6 @@ public class Event {
         this.created = created;
     }
 
-    //  Methods
 
     /**
      * @param otherEvent data transformed as user from app
@@ -334,4 +359,5 @@ public class Event {
         this.getOwner().getOwnedEvents().remove(this);
         this.setOwner(newOwner);
     }
+
 }

@@ -31,7 +31,6 @@ public class UserController {
     private final EventRepository eventRepository;
     private Authenticator authenticator = new Authenticator();
     private ObjectMapper mapper = new ObjectMapper();
-    private UserDao userDao = new UserDao();
     private UserService userService = new UserService();
 
     // This means to get the bean called userRepository
@@ -573,7 +572,6 @@ public class UserController {
 ////        eventRepository.save(event1);
 
         Iterable<User> users = userRepository.findAll();
-        Iterable<User> users2 = userDao.getUsers();
         Iterable<Event> events = eventRepository.findAll();
 
         System.out.println("\n#####################################");

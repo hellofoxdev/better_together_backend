@@ -116,6 +116,10 @@ public class Location {
         return events;
     }
 
+    public void removeEvent(Event event) {
+        this.events.remove(event);
+    }
+
     public void setEvents(List<Event> events) {
         this.events = events;
     }
