@@ -5,7 +5,6 @@ import com.sebastianfox.food.models.Tag;
 import com.sebastianfox.food.models.User;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class EventService {
@@ -16,6 +15,30 @@ public class EventService {
 
     public void updateEvent(Event dbEvent, Event appEvent) {
         dbEvent.mergeDataFromOtherInstance(appEvent);
+    }
+
+    public void attendToEvent(Event event, User user) {
+        if (!event.isDeleted() && event.isOpen()) {
+            event.addInterested(user);
+        }
+    }
+
+    public void acceptInterested(Event event, User interested){
+        if (!event.isDeleted() && event.getInteresteds().contains(interested)) {
+            event.addMember(interested);
+            event.removeInterested(interested);
+        }
+    }
+
+    public void declineInterested(Event event, User interested){
+        if (!event.isDeleted() && event.getInteresteds().contains(interested)) {
+            event.removeInterested(interested);
+        }
+    }
+
+    public void deleteEvent(Event event) {
+        event.setDeleted(true);
+        event.setOpen(false);
     }
 
     public void prepareForDelete(Event event) {

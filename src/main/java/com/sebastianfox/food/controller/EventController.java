@@ -2,8 +2,6 @@ package com.sebastianfox.food.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sebastianfox.food.enums.EventTypes;
-import com.sebastianfox.food.enums.PrivacyTypes;
 import com.sebastianfox.food.models.Event;
 import com.sebastianfox.food.models.Location;
 import com.sebastianfox.food.models.User;
@@ -20,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.*;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @SuppressWarnings("unused")
@@ -45,81 +41,77 @@ public class EventController {
         this.locationRepository = locationRepository;
     }
 
-    @GetMapping(path = "/all")
-    public @ResponseBody
-    Iterable<Event> getAllUserEvents() {
-        // This returns a JSON or XML with the users
-        return eventRepository.findAll();
-    }
-
     /**
      *
      * @param localeData JSON data from App
-     * @return http response
      * @throws JSONException exception
      * @throws IOException exception
      */
+    @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/loadAllEvents", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> loadAllEvents(@RequestBody HashMap<String, String> localeData) throws JSONException, IOException {
 
+        // prepare response hash
+        HashMap<String,Object> responseHash = new HashMap<>();
+
+        // load all events
         Iterable<Event> events = eventRepository.findAll();
 
-        HashMap<String,Object> hashMap = new HashMap<>();
-
         // Object to JSON String
-        hashMap.put("events",events);
-        String jsonString = mapper.writeValueAsString(hashMap);
+        responseHash.put("events",events);
+        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseJson, HttpStatus.ACCEPTED);
     }
 
     /**
      *
      * @param localeData JSON data from App
-     * @return http response
      * @throws JSONException exception
      * @throws IOException exception
      */
+    @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/loadAllNotDeletedEvents", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> loadAllNotDeletedEvents(@RequestBody HashMap<String, String> localeData) throws JSONException, IOException {
 
         Iterable<Event> events = eventRepository.findAllByDeletedIsFalse();
 
-        HashMap<String,Object> hashMap = new HashMap<>();
+        HashMap<String,Object> responseHash = new HashMap<>();
 
         // Object to JSON String
-        hashMap.put("events",events);
-        String jsonString = mapper.writeValueAsString(hashMap);
+        responseHash.put("events",events);
+        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseJson, HttpStatus.ACCEPTED);
     }
 
     /**
      *
-     * @param userData JSON data from App
-     * @return http response
+     * @param data JSON data from App
      * @throws JSONException exception
      * @throws IOException exception
      */
     @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/loadUserEvents", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> loadUserEvents(@RequestBody HashMap<String, Object> userData) throws JSONException, IOException {
+    @RequestMapping(path = "/loadEventsByUser", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> loadEventsByUser(@RequestBody HashMap<String, Object> data) throws JSONException, IOException {
 
         HashMap<String,Object> hashMap = new HashMap<>();
-        User appUser = userRepository.findById((UUID) userData.get("id"));
+
+        UUID userId = mapper.convertValue(data.get("user_id"), UUID.class);
+        User user = userRepository.findById(userId);
 
         // check if user is available in database
-        if (appUser == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // check it getEvents is not null
-        if (appUser.getEvents() == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        if (user.getEvents() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // attach events to response
-        hashMap.put("events",appUser.getEvents());
+        hashMap.put("events",user.getEvents());
         // Object to JSON String
         String jsonString = mapper.writeValueAsString(hashMap);
         // Return to App
@@ -129,98 +121,35 @@ public class EventController {
     /**
      *
      * @param data JSON data from App
-     * @return http response
      * @throws JSONException exception
+     * @throws IOException exception
      */
     @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/createNewEventByString", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> createNewEventByString(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException, ParseException {
+    @RequestMapping(path = "/reloadEvent", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> reloadEvent(@RequestBody HashMap<String, Object> data) throws JSONException, IOException {
 
-        HashMap<String,Object> hashMap = new HashMap<>();
+        // Preperation
+        HashMap<String,Object> responseHash = new HashMap<>();
 
-        // Initialize new event
-        Event event = new Event();
+        // Get Data
+        UUID uuid = mapper.convertValue(data.get("id"), UUID.class);
+        Event event = eventRepository.findById(uuid);
 
-        if (data.get("privacyTypes") == null || data.get("eventType") == null || data.get("user_id") == null || data.get("text") == null || data.get("date") == null){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        // Check if event is available in database
+        if (event == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // Find owner of event by given id
-        User user = userRepository.findById((UUID) data.get("user_id"));
-        if (user == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-        // Event type
-        event.setEventType(EventTypes.valueOf(data.get("eventType").toString().toUpperCase()));
-
-        // Event privacy
-        event.setPrivacyTypes(PrivacyTypes.valueOf(data.get("privacyTypes").toString().toUpperCase()));
-
-        // Title of event
-        event.setText(data.get("text").toString());
-
-        // Owner of event
-        event.setOwner(user);
-
-        // Date
-        String dateString = data.get("date").toString();
-        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
-        event.setDate(date);
-
-        // Optional values
-        // max. Participants
-        if (data.get("maxParticipants") != null) {
-            event.setMaxParticipants((Integer) data.get("maxParticipants"));
-        }
-
-        // description of event
-        if (data.get("description") != null) {
-            event.setDescription(data.get("description").toString());
-        }
-
-        eventRepository.save(event);
-
-        // Successful register
-        hashMap.put("event", event);
         // Object to JSON String
-        String jsonString = mapper.writeValueAsString(hashMap);
+        responseHash.put("event",event);
+        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.CREATED);
+        return new ResponseEntity<>(responseJson, HttpStatus.ACCEPTED);
     }
 
     /**
      *
      * @param data JSON data from App
-     * @return http response
-     * @throws JSONException exception
-     */
-    @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/createNewEventByObject", method = RequestMethod.POST, consumes = {"application/json"})
-//    public ResponseEntity<Object> createNewEventByObject(@RequestBody Event data) throws JSONException, IOException, ParseException {
-    public ResponseEntity<Object> createNewEventByObject(@RequestBody HashMap<String,Object> data) throws JSONException, IOException {
-
-        HashMap<String,Object> hashMap = new HashMap<>();
-
-        Object excludedData = data.get("event");
-        Event event = mapper.convertValue(excludedData, Event.class);
-
-        User dbUser = userRepository.findById((UUID) data.get("user"));
-        event.setOwner(dbUser);
-
-        eventRepository.save(event);
-
-        // Successful register
-        hashMap.put("event", event);
-        // Object to JSON String
-        String jsonString = mapper.writeValueAsString(hashMap);
-        // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.CREATED);
-    }
-
-    /**
-     *
-     * @param data JSON data from App
-     * @return http response
      * @throws JSONException exception
      */
     @SuppressWarnings("Duplicates")
@@ -231,20 +160,16 @@ public class EventController {
         HashMap<String,Object> responseHash = new HashMap<>();
         Event dbEvent;
 
-        // deterine data from json
-        Object determinedData = data.get("event");
-        Object determinedIds = data.get("ids");
-
         // convert determined data into correct types
-        HashMap ids = mapper.convertValue(determinedIds, HashMap.class);
-        Event appEvent = mapper.convertValue(determinedData, Event.class);
+        HashMap ids = mapper.convertValue(data.get("ids"), HashMap.class);
+        Event appEvent = mapper.convertValue(data.get("event"), Event.class);
 
         // check if all conditions are given to save or update an event at all
         if (appEvent == null ||
                 appEvent.getLocation() == null ||
                 appEvent.getLocation().getLangitude() == null ||
                 appEvent.getLocation().getLongitude() == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         // check if location (langitude/longitude) within event already exists, if so, re-use existing location
@@ -282,163 +207,146 @@ public class EventController {
     /**
      *
      * @param data JSON data from App
-     * @return http response
      * @throws JSONException exception
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/attendToEvent", method = RequestMethod.POST, consumes = {"application/json"})
     public ResponseEntity<Object> attendToEvent(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
 
-        HashMap<String,Object> hashMap = new HashMap<>();
+        HashMap<String,Object> responseHash = new HashMap<>();
+
+        // check if necessary parameters available
+        if (data.get("user_id") == null || data.get("event_id") == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // Find event by given id
+        UUID eventId = mapper.convertValue(data.get("event_id"), UUID.class);
+        Event event = eventRepository.findById(eventId);
+
+        // Find user of event by given id
+        UUID userId = mapper.convertValue(data.get("user_id"), UUID.class);
+        User user = userRepository.findById(userId);
+
+        // check if user and event are both available
+        if (user == null || event == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // // add interested by EventService
+        eventService.attendToEvent(event, user);
+
+        // save event (merges the user as well)
+        eventRepository.save(event);
+
+        // Successful register
+        responseHash.put("event", event);
+
+        // Object to JSON String
+        String responseJson = mapper.writeValueAsString(responseHash);
+
+        // Return to App
+        return new ResponseEntity<>(responseJson, HttpStatus.ACCEPTED);
+    }
+
+    /**
+     *
+     * @param data JSON data from App
+     * @throws JSONException exception
+     */
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(path = "/acceptInterested", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> acceptInterested(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
+
+        HashMap<String,Object> responseHash = new HashMap<>();
+
+        if (data.get("user_id") == null || data.get("event_id") == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // Find event by given id
+        UUID eventId = mapper.convertValue(data.get("event_id"), UUID.class);
+        Event event = eventRepository.findById(eventId);
+
+        // Find user of event by given id
+        UUID userId = mapper.convertValue(data.get("user_id"), UUID.class);
+        User user = userRepository.findById(userId);
+
+        // check if user and event are both available
+        if (user == null || event == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // accept interested by EventService
+        eventService.acceptInterested(event, user);
+
+        // save event (merges the user as well)
+        eventRepository.save(event);
+
+        // Successful register
+        responseHash.put("event", event);
+
+        // Object to JSON String
+        String responseJson = mapper.writeValueAsString(responseHash);
+
+        // Return to App
+        return new ResponseEntity<>(responseJson, HttpStatus.ACCEPTED);
+    }
+
+    /**
+     *
+     * @param data JSON data from App
+     * @throws JSONException exception
+     */
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(path = "/declineInterested", method = RequestMethod.POST, consumes = {"application/json"})
+    public ResponseEntity<Object> declineInterested(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
+
+        HashMap<String,Object> responseHash = new HashMap<>();
 
         if (data.get("user_id") == null || data.get("event_id") == null){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
         // Find event by given id
-        Event event = eventRepository.findById((UUID) data.get("event_id"));
-        if (event == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        UUID eventId = mapper.convertValue(data.get("event_id"), UUID.class);
+        Event event = eventRepository.findById(eventId);
+
+        // Find user of event by given id
+        UUID userId = mapper.convertValue(data.get("user_id"), UUID.class);
+        User user = userRepository.findById(userId);
+
+        // check if user and event are both available
+        if (user == null || event == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        // Find owner of event by given id
-        User user = userRepository.findById((UUID) data.get("user_id"));
-        if (user == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+        // decline interested by EventService
+        eventService.declineInterested(event, user);
 
-        // Check if event has available space for more members
-        if (!event.hasAvailableSpaces()){
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-        }
-
-//        boolean isAddable = false;
-//
-//        // check if privacy setting of event matches to the connection between requester and event owner
-//        switch(event.getPrivacyType()){
-//            case FRIENDS:
-//                isAddable = event.getOwner().getAcceptedFriends().contains(user);
-//                break;
-//            case FRIENDSOFFRIENDS:
-//                if (event.getOwner().getAcceptedFriends().contains(user) || event.getOwner().getFriendsOfAllFriends().contains(user)) {
-//                    isAddable = true;
-//                }
-//                break;
-//            case PRIVATE:
-//                // Einladungssystem fehlt noch
-//                isAddable = false;
-//                break;
-//            case PUBLIC:
-//                // blocked User Handling kann noch eingebaut werden
-//                isAddable = true;
-//                break;
-//            default:
-//                isAddable = false;
-//        }
-//
-//        if (isAddable) {
-//            event.addMember(user);
-//            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-//        }
-
-        event.addInterested(user);
-
-        // save user
-        userRepository.save(user);
-
-        // save event
+        // save event (merges the user as well)
         eventRepository.save(event);
 
         // Successful register
-        hashMap.put("event", event);
+        responseHash.put("event", event);
 
         // Object to JSON String
-        String jsonString = mapper.writeValueAsString(hashMap);
+        String responseJson = mapper.writeValueAsString(responseHash);
 
         // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
-    }
-
-    /**
-     *
-     * @param eventData JSON data from App
-     * @return http response
-     * @throws JSONException exception
-     * @throws IOException exception
-     */
-    @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/reloadEventById", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> reloadEventById(@RequestBody HashMap<String, Object> eventData) throws JSONException, IOException {
-
-        // Preperation
-        HashMap<String,Object> hashMap = new HashMap<>();
-
-        // Get Data
-        UUID id = (UUID) eventData.get("id");
-        Event event = eventRepository.findById(id);
-
-        // Check if event is available in database
-        if (event == null){
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-        }
-
-        // Object to JSON String
-        hashMap.put("event",event);
-        String jsonString = mapper.writeValueAsString(hashMap);
-        // Return to App
-        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseJson, HttpStatus.ACCEPTED);
     }
 
     /**
      *
      * @param data JSON data from App
-     * @return http response
-     * @throws JSONException exception
-    */
-    @SuppressWarnings("Duplicates")
-    @RequestMapping(path = "/getAllAvailableEventsForUser", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> getAllAvailableEventsForUser(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
-
-        HashMap<String, Object> responseHash = new HashMap<>();
-
-        if (data.get("user_id") == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-
-        UUID uuid = mapper.convertValue(data.get("user_id"), UUID.class);
-
-        // Find owner of event by given id
-        User user = userRepository.findById(uuid);
-        if (user == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-
-        List<Event> events = new ArrayList<>();
-        events.addAll(eventRepository.findAllByPrivacyType(PrivacyTypes.PUBLIC));
-        events.addAll(user.getEventsOfAllConnections());
-
-        // Object to JSON String
-        responseHash.put("events", events);
-
-        // Object to JSON String
-        String jsonString = mapper.writeValueAsString(responseHash);
-
-        // Return to app (successful)
-        return new ResponseEntity<>(jsonString, HttpStatus.OK);
-    }
-
-    /**
-     *
-     * @param data JSON data from App
-     * @return http response
      * @throws JSONException exception
      */
     @SuppressWarnings("Duplicates")
     @RequestMapping(path = "/deleteEvent", method = RequestMethod.POST, consumes = {"application/json"})
-    public ResponseEntity<Object> deleteEvent(@RequestBody HashMap<String, Object> data) throws JSONException, JsonProcessingException {
+    public ResponseEntity<Object> deleteEvent(@RequestBody HashMap<String, Object> data) throws JSONException {
 
         // Get Data
-//        UUID id = (UUID) data.get("id");
         UUID id = mapper.convertValue(data.get("id"), UUID.class);
 
         Event event = eventRepository.findById(id);
@@ -448,13 +356,10 @@ public class EventController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
 
-//        eventService.prepareForDelete(event);
-        event.setDeleted(true);
+        eventService.deleteEvent(event);
         eventRepository.save(event);
 
         // Return to App
-//        return new ResponseEntity<>(HttpStatus.ACCEPTED);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }
