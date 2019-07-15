@@ -9,14 +9,6 @@ import java.util.List;
 
 public class EventService {
 
-    public void addMember(Event event, User user) {
-        event.addMember(user);
-    }
-
-    public void updateEvent(Event dbEvent, Event appEvent) {
-        dbEvent.mergeDataFromOtherInstance(appEvent);
-    }
-
     public void attendToEvent(Event event, User user) {
         if (!event.isDeleted() && event.isOpen()) {
             event.addInterested(user);
@@ -43,24 +35,21 @@ public class EventService {
 
     public void prepareForDelete(Event event) {
 
-        List<User> membersToDelete = new ArrayList<>();
-        membersToDelete.addAll(event.getMembers());
+        List<User> membersToDelete = new ArrayList<>(event.getMembers());
         for (User member : membersToDelete) {
             if (event.getMembers().contains(member)) {
                 event.removeMember(member);
             }
         }
 
-        List<User> interestedsToDelete = new ArrayList<>();
-        interestedsToDelete.addAll(event.getInteresteds());
+        List<User> interestedsToDelete = new ArrayList<>(event.getInteresteds());
         for (User interested : interestedsToDelete) {
             if (event.getInteresteds().contains(interested)) {
                 event.removeInterested(interested);
             }
         }
 
-        List<Tag> tagsToDelete = new ArrayList<>();
-        tagsToDelete.addAll(event.getTags());
+        List<Tag> tagsToDelete = new ArrayList<>(event.getTags());
         for (Tag tag : tagsToDelete) {
             if (event.getTags().contains(tag)) {
                 event.removeTag(tag);
