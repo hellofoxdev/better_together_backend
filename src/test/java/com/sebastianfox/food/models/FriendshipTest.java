@@ -61,4 +61,38 @@ public class FriendshipTest
         assertTrue(friendship.isAccepted());
 
     }
+
+    @Test
+    public void testDelete()
+    {
+        User testUser1 = new User();
+        testUser1.setUserName("user1");
+
+        User testUser2 = new User();
+        testUser2.setUserName("user2");
+
+        testUser1.createAndAcceptFriendship(testUser2);
+        assertEquals(1, testUser1.getFriendshipsFriend1().size());
+        assertEquals(0, testUser1.getFriendshipsFriend2().size());
+        assertEquals(0, testUser2.getFriendshipsFriend1().size());
+        assertEquals(1, testUser2.getFriendshipsFriend2().size());
+
+        Iterator<Friendship> friendshipIterator = testUser1.getFriendshipsFriend1().iterator();
+        Friendship friendship = friendshipIterator.next();
+
+        assertFalse(friendship.isAccepted());
+
+        testUser2.createAndAcceptFriendship(testUser1);
+
+        assertTrue(friendship.isAccepted());
+
+        testUser1.declineAndDeleteFriendship(testUser2);
+
+        assertFalse(friendship.isAccepted());
+        assertEquals(0, testUser1.getFriendshipsFriend1().size());
+        assertEquals(0, testUser1.getFriendshipsFriend2().size());
+        assertEquals(0, testUser2.getFriendshipsFriend1().size());
+        assertEquals(0, testUser2.getFriendshipsFriend2().size());
+
+    }
 }

@@ -3,6 +3,8 @@ package com.sebastianfox.food.models;
 import com.sebastianfox.food.services.EventService;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class EventTest
@@ -79,9 +81,11 @@ public class EventTest
     {
         User testUser1 = new User();
         testUser1.setUserName("user1");
+        testUser1.setEmail("testUser1@mail.de");
 
         User testUser2 = new User();
         testUser2.setUserName("user2");
+        testUser2.setEmail("testUser2@mail.de");
 
         User testUser3 = new User();
         testUser3.setUserName("user3");

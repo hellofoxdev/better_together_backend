@@ -17,7 +17,7 @@
       <configuration>
         <setting name="validation-enabled" value="true" />
         <datasource-mapping>
-          <factory-entry name="com.sebastianfox" />
+          <factory-entry name="com.sebastianfox" value="6853627c-950f-47c2-87e1-3435d9883d10" />
           <factory-entry name="entityManagerFactory" value="6853627c-950f-47c2-87e1-3435d9883d10" />
         </datasource-mapping>
         <naming-strategy-map />

@@ -10,6 +10,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity
@@ -31,10 +32,13 @@ public class Event {
     private String text;
 
 //    @OneToOne(cascade = CascadeType.ALL)
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
     @JoinColumn(name = "location_id", referencedColumnName = "location_id")
     @JsonBackReference
-//    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "event"})
     @JsonIgnoreProperties({"event"})
     private Location location;
 
@@ -50,7 +54,6 @@ public class Event {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "owner_id", nullable=false)
-//    @JsonIgnoreProperties({"events", "text", "ownedEvents","acceptedFriends", "requestedFriengetOwdsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents"})
     @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private User owner;
 
@@ -65,7 +68,6 @@ public class Event {
                     CascadeType.MERGE
             },
             mappedBy = "events")
-//    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
     @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<User> members;
 
@@ -74,8 +76,7 @@ public class Event {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             },
-            mappedBy = "events")
-//    @JsonIgnoreProperties({"events", "ownedEvents","acceptedFriends", "requestedFriendsByCurrentUser", "requestedFriendsByFriend", "events", "ownedEvents","friendshipsFriend2", "friendsOfAllFriends", "members", "interesteds", "interestedEvents", "ownedEvents"})
+            mappedBy = "interestedEvents")
     @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     private List<User> interesteds;
 
@@ -197,16 +198,6 @@ public class Event {
         }
     }
 
-    public void clearMembers() {
-        for( User member: this.members )
-        {
-            if (member.getEvents().contains(this)) {
-                member.removeEvent(this);
-            }
-            this.members.remove(member);
-        }
-    }
-
     // Interested
     public List<User> getInteresteds() {
         return interesteds;
@@ -230,16 +221,6 @@ public class Event {
         }
     }
 
-    public void clearInteresteds() {
-        for( User interested: interesteds )
-        {
-            if (interested.getInterestedEvents().contains(this)) {
-                interested.removeInterestedEvent(this);
-            }
-            this.interesteds.remove(interested);
-        }
-    }
-
     public Set<Tag> getTags() {
         return tags;
     }
@@ -259,16 +240,6 @@ public class Event {
         this.tags.remove(tag);
         if (tag.getEvents().contains(this)) {
             tag.removeEvent(this);
-        }
-    }
-
-    public void clearTags() {
-        for( Tag tag: tags )
-        {
-            if (tag.getEvents().contains(this)) {
-                tag.removeEvent(this);
-            }
-            this.tags.remove(tag);
         }
     }
 
@@ -342,7 +313,6 @@ public class Event {
     public void setCreated(Date created) {
         this.created = created;
     }
-
 
     /**
      * @param otherEvent data transformed as user from app
