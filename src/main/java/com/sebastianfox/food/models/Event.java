@@ -1,21 +1,23 @@
 package com.sebastianfox.food.models;
 
-//import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sebastianfox.food.enums.EventTypes;
-import com.sebastianfox.food.enums.PrivacyTypes;
+//import com.sebastianfox.food.enums.PrivacyTypes;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Entity
 @Table(name="events")
 public class Event {
+
+    /* #############################
+        Variables
+    ############################# */
 
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -29,14 +31,19 @@ public class Event {
     @Column(name = "open", nullable = false)
     private boolean open = true;
 
+    /* *************************
+     *  Event parameter / configuration
+     ************************ */
+
     private String text;
 
-//    @OneToOne(cascade = CascadeType.ALL)
-    @ManyToOne(fetch=FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            })
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type")
+    private EventTypes eventType;
+
+    @ManyToOne(fetch=FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "location_id", referencedColumnName = "location_id")
     @JsonBackReference
     @JsonIgnoreProperties({"event"})
@@ -44,51 +51,37 @@ public class Event {
 
     private Date date;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "privacy_type")
-    private PrivacyTypes privacyType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_type")
-    private EventTypes eventType;
-
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(fetch=FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "owner_id", nullable=false)
-    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail",
+            "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents",
+            "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend",
+            "requestedFriendsByCurrentUser"})
     private User owner;
 
-    private String description;
+    /* *************************
+     *  User Collections (Interesteds / Members)
+     ************************ */
 
-    @Column(name = "max_participants")
-    private Integer maxParticipants;
-
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "events")
-    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
-    private List<User> members;
-
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             mappedBy = "interestedEvents")
-    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail",
+            "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents",
+            "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend",
+            "requestedFriendsByCurrentUser"})
     private List<User> interesteds;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             mappedBy = "events")
-    @JsonIgnoreProperties({"events"})
-    @JsonIgnore
-    private Set<Tag> tags = new HashSet<>();
+    @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail",
+            "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents",
+            "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend",
+            "requestedFriendsByCurrentUser"})
+    private List<User> members;
+
+    /* *************************
+     *  Status
+     ************************ */
 
     @JsonIgnore
     private Date updated;
@@ -96,17 +89,60 @@ public class Event {
     @JsonIgnore
     private Date created;
 
-    /**
-     * Constructor
-     */
+    /* ***************************************************************************************************************
+        Provisions for further needs
+     *************************************************************************************************************** */
+
+//    @Column(name = "max_participants")
+//    private Integer maxParticipants;
+
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "privacy_type")
+//    private PrivacyTypes privacyType;
+
+//    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "events")
+//    @JsonIgnoreProperties({"events"})
+//    @JsonIgnore
+//    private Set<Tag> tags = new HashSet<>();
+
+    /* #############################
+     *  Constructor
+     ############################# */
+
     public Event() {
         this.members = new ArrayList<>();
         this.interesteds = new ArrayList<>();
         eventType = EventTypes.OTHERS;
-        privacyType = PrivacyTypes.PUBLIC;
+//        privacyType = PrivacyTypes.PUBLIC;
     }
 
-    //   Getter and Setter
+    /* #############################
+     *  Methods
+     ############################# */
+
+    /**
+     * @param otherEvent data transformed as user from app
+     */
+    public void mergeDataFromOtherInstance(Event otherEvent) {
+        this.text = otherEvent.getText();
+        this.description = otherEvent.getDescription();
+        this.eventType = otherEvent.getEventType();
+//        this.privacyType = otherEvent.getPrivacyType();
+//        this.maxParticipants = otherEvent.getMaxParticipants();
+    }
+
+    public void changeOwner(User newOwner){
+        this.getOwner().getOwnedEvents().remove(this);
+        this.setOwner(newOwner);
+    }
+
+    /* #############################
+     *  Getter and Setter methods
+     ############################# */
+
+    /* *************************
+     *  Event Information Handling
+     ************************ */
 
     public UUID getId() {
         return id;
@@ -151,15 +187,6 @@ public class Event {
         this.description = description;
     }
 
-    public Integer getMaxParticipants() {
-        return maxParticipants;
-    }
-
-    public void setMaxParticipants(Integer maxParticipants) {
-        this.maxParticipants = maxParticipants;
-    }
-
-//    @JsonIgnore
     public User getOwner() {
         return owner;
     }
@@ -221,28 +248,6 @@ public class Event {
         }
     }
 
-    public Set<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
-    }
-
-    public void addTag(Tag tag) {
-        this.tags.add(tag);
-        if (!tag.getEvents().contains(this)) {
-            tag.addEvent(this);
-        }
-    }
-
-    public void removeTag(Tag tag) {
-        this.tags.remove(tag);
-        if (tag.getEvents().contains(this)) {
-            tag.removeEvent(this);
-        }
-    }
-
     public void removeFromOwnersList() {
         this.owner.removeOwnedEventFromList(this);
     }
@@ -255,29 +260,11 @@ public class Event {
         this.eventType = eventType;
     }
 
-    public PrivacyTypes getPrivacyType() {
-        return privacyType;
-    }
+    /* *************************
+     *  Status
+     ************************ */
 
-    public void setPrivacyTypes(PrivacyTypes privacyType) {
-        this.privacyType = privacyType;
-    }
-
-    public boolean hasAvailableSpaces() {
-        return this.getMembers().size() < this.getMaxParticipants();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updated = new Date();
-    }
-
-    @PrePersist
-    public void prePersist() {
-        updated = new Date();
-        created = new Date();
-    }
-
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isDeleted() {
         return deleted;
     }
@@ -294,9 +281,9 @@ public class Event {
         this.open = open;
     }
 
-    public void setPrivacyType(PrivacyTypes privacyType) {
-        this.privacyType = privacyType;
-    }
+    /* *************************
+     *  Persistence information
+     ************************ */
 
     public Date getUpdated() {
         return updated;
@@ -314,20 +301,61 @@ public class Event {
         this.created = created;
     }
 
-    /**
-     * @param otherEvent data transformed as user from app
-     */
-    public void mergeDataFromOtherInstance(Event otherEvent) {
-        this.text = otherEvent.getText();
-        this.description = otherEvent.getDescription();
-        this.eventType = otherEvent.getEventType();
-        this.privacyType = otherEvent.getPrivacyType();
-        this.maxParticipants = otherEvent.getMaxParticipants();
+    @PreUpdate
+    public void preUpdate() {
+        updated = new Date();
     }
 
-    public void changeOwner(User newOwner){
-        this.getOwner().getOwnedEvents().remove(this);
-        this.setOwner(newOwner);
+    @PrePersist
+    public void prePersist() {
+        updated = new Date();
+        created = new Date();
     }
+
+    /* ***************************************************************************************************************
+        Provisions for further needs
+     *************************************************************************************************************** */
+
+//    public Integer getMaxParticipants() {
+//        return maxParticipants;
+//    }
+
+//    public void setMaxParticipants(Integer maxParticipants) {
+//        this.maxParticipants = maxParticipants;
+//    }
+
+//    public boolean hasAvailableSpaces() {
+//        return this.getMembers().size() < this.getMaxParticipants();
+//    }
+
+//    public PrivacyTypes getPrivacyType() {
+//        return privacyType;
+//    }
+
+//    public void setPrivacyType(PrivacyTypes privacyType) {
+//        this.privacyType = privacyType;
+//    }
+
+//    public Set<Tag> getTags() {
+//        return tags;
+//    }
+
+//    public void setTags(Set<Tag> tags) {
+//        this.tags = tags;
+//    }
+
+//    public void addTag(Tag tag) {
+//        this.tags.add(tag);
+//        if (!tag.getEvents().contains(this)) {
+//            tag.addEvent(this);
+//        }
+//    }
+
+//    public void removeTag(Tag tag) {
+//        this.tags.remove(tag);
+//        if (tag.getEvents().contains(this)) {
+//            tag.removeEvent(this);
+//        }
+//    }
 
 }

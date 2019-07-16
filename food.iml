@@ -16,11 +16,11 @@
     <facet type="jpa" name="JPA">
       <configuration>
         <setting name="validation-enabled" value="true" />
+        <setting name="provider-name" value="" />
         <datasource-mapping>
-          <factory-entry name="com.sebastianfox" value="6853627c-950f-47c2-87e1-3435d9883d10" />
-          <factory-entry name="entityManagerFactory" value="6853627c-950f-47c2-87e1-3435d9883d10" />
+          <factory-entry name="com.sebastianfox" value="e1b98b8c-716a-4a2a-8a46-a421144afdd1" />
+          <factory-entry name="entityManagerFactory" value="e1b98b8c-716a-4a2a-8a46-a421144afdd1" />
         </datasource-mapping>
-        <naming-strategy-map />
         <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/resources/META-INF/persistence_old.xml" />
       </configuration>
     </facet>
