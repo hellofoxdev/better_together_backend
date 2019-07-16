@@ -1,27 +1,14 @@
 package com.sebastianfox.food.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebastianfox.food.models.Event;
 import com.sebastianfox.food.models.User;
 import com.sebastianfox.food.utils.Authenticator;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import java.util.HashMap;
 
 public class UserService {
 
     private Authenticator authenticator = new Authenticator();
     private ObjectMapper mapper = new ObjectMapper();
-
-    public User downcast(User origin) {
-        User user = new User();
-        user.setId(origin.getId());
-        user.setUserName(origin.getUserName());
-        return user;
-    }
-
 
     public void addEvent(User user, Event event) {
         user.addEvent(event);
@@ -35,6 +22,17 @@ public class UserService {
         user.setSalt(authenticator.getNextSalt());
         user.setPassword(authenticator.hash(password.toCharArray(), user.getSalt()));
         return user;
+    }
+
+    public void fullfilFacebookUser(User user) {
+        user.setFacebookAccount(true);
+        user.setEmail(user.getFacebookAccountEmail());
+        user.setFacebookAccountUserName(user.getEmail());
+        user.setUserName(user.getEmail());
+        user.setSalt(authenticator.getNextSalt());
+        // change facebookEmail to facebookId for password
+        user.setPassword(authenticator.hash(String.valueOf(user.getFacebookAccountId()).toCharArray(), user.getSalt()));
+
     }
 
     public void updateUser(User dbUser, User appUser) {

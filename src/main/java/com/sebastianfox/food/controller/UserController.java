@@ -152,7 +152,7 @@ public class UserController {
         }
 
         // Return to App
-        return new ResponseEntity<>(createResposneJson("user", user), HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", user), HttpStatus.ACCEPTED);
     }
 
     /**
@@ -166,17 +166,28 @@ public class UserController {
     public ResponseEntity<Object> authenticateWithFacebook(@RequestBody HashMap<String, Object> data)
             throws JSONException, IOException {
 
-        User requestedUser = (User) data.get("user");
+        // user rebuild from app request
+        User requestedUser = mapper.convertValue(data.get("user"), User.class);
+
+        // user from db find by facebook ID
         User facebookUser = userRepository.findByFacebookAccountId(requestedUser.getFacebookAccountId());
 
-        // If user does not exist, create it
-        if (facebookUser == null) {
+        if (facebookUser != null) {
+            if (requestedUser.getId() == null || (!facebookUser.getId().equals(requestedUser.getId()))) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+            if (!authenticator.isExpectedPassword(String.valueOf(facebookUser.getFacebookAccountId()).toCharArray(), facebookUser.getSalt(), facebookUser.getPassword())) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            return new ResponseEntity<>(createResposneJson("user", facebookUser), HttpStatus.ACCEPTED);
+        }
+
+        if (requestedUser.getId() == null && requestedUser.getFacebookAccountEmail() != null) {
+            userService.fullfilFacebookUser(requestedUser);
             userRepository.save(requestedUser);
             return new ResponseEntity<>(createResposneJson("user", requestedUser), HttpStatus.CREATED);
         }
-
-        // User already exists and is found in database
-        return new ResponseEntity<>(createResposneJson("user", facebookUser), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
     /* #############################
@@ -245,7 +256,7 @@ public class UserController {
     public ResponseEntity<Object> reloadUser(@RequestBody HashMap<String, UUID> data)
             throws JSONException, IOException {
 
-        User user = userRepository.findById(data.get("id"));
+        User user = userRepository.findById(data.get("user_id"));
 
         // Fail
         if (user == null) {
