@@ -37,7 +37,7 @@ public class UserService {
         return user;
     }
 
-    public void mergeData(User dbUser, User appUser) {
+    public void updateUser(User dbUser, User appUser) {
         dbUser.mergeDataFromOtherInstance(appUser);
     }
 

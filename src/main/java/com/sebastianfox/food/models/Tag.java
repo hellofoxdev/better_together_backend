@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused"})
 @Entity
 @Table(name="tags")
 public class Tag {
@@ -25,8 +25,8 @@ public class Tag {
                     CascadeType.MERGE
             })
     @JoinTable(name="tags_events",
-            joinColumns=@JoinColumn(name="tagId"),
-            inverseJoinColumns=@JoinColumn(name="eventId")
+            joinColumns=@JoinColumn(name="tag_id"),
+            inverseJoinColumns=@JoinColumn(name="event_id")
     )
     @JsonIgnoreProperties({"tags"})
     private List<Event> events;
@@ -67,16 +67,16 @@ public class Tag {
 
     public void addEvent(Event event){
         this.events.add(event);
-        if (!event.getTags().contains(this)){
-            event.addTag(this);
-        }
+//        if (!event.getTags().contains(this)){
+//            event.addTag(this);
+//        }
     }
 
     public void removeEvent(Event event){
         this.events.remove(event);
-        if (event.getTags().contains(this)) {
-            event.removeTag(this);
-        }
+//        if (event.getTags().contains(this)) {
+//            event.removeTag(this);
+//        }
     }
 
     @PreUpdate

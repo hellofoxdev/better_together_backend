@@ -104,13 +104,13 @@ public class User {
      *  Friendships
      ************************ */
 
-    @OneToMany(mappedBy = "friend1")
+    @OneToMany(mappedBy = "friend1", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     @JsonIgnoreProperties({"friend1", "friend2", "open", "accepted"})
     @JsonManagedReference(value = "friend1")
     private List<Friendship> friendshipsFriend1;
 
-    @OneToMany(mappedBy = "friend2")
+    @OneToMany(mappedBy = "friend2", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     @JsonIgnoreProperties({"friend1", "friend2", "open", "accepted"})
     @JsonManagedReference(value = "friend2")
@@ -131,8 +131,8 @@ public class User {
      ############################# */
 
     public User() {
-//        this.friendshipsFriend1 = new ArrayList<>();
-//        this.friendshipsFriend2 = new ArrayList<>();
+        this.friendshipsFriend1 = new ArrayList<>();
+        this.friendshipsFriend2 = new ArrayList<>();
         this.events = new ArrayList<>();
         this.ownedEvents = new ArrayList<>();
         this.interestedEvents = new ArrayList<>();
@@ -147,8 +147,9 @@ public class User {
      */
     public void mergeDataFromOtherInstance(User appUser) {
         this.userName = appUser.userName;
-        this.email = appUser.email;
         this.name = appUser.name;
+        this.description = appUser.description;
+        this.email = appUser.email;
     }
 
     /* #############################

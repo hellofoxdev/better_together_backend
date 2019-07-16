@@ -49,12 +49,12 @@ public class EventService {
             }
         }
 
-        List<Tag> tagsToDelete = new ArrayList<>(event.getTags());
-        for (Tag tag : tagsToDelete) {
-            if (event.getTags().contains(tag)) {
-                event.removeTag(tag);
-            }
-        }
+//        List<Tag> tagsToDelete = new ArrayList<>(event.getTags());
+//        for (Tag tag : tagsToDelete) {
+//            if (event.getTags().contains(tag)) {
+//                event.removeTag(tag);
+//            }
+//        }
 
         // remove from locatiuon array
         event.getLocation().removeEvent(event);

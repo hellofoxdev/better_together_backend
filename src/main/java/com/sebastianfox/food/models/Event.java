@@ -35,9 +35,14 @@ public class Event {
      *  Event parameter / configuration
      ************************ */
 
-    private String text;
+    @Column(name = "name", nullable = false)
+    private String name;
 
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "meetingpoint")
+    private String meetingpoint;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "event_type")
@@ -49,6 +54,7 @@ public class Event {
     @JsonIgnoreProperties({"event"})
     private Location location;
 
+    @Column(name = "date")
     private Date date;
 
     @ManyToOne(fetch=FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -112,7 +118,7 @@ public class Event {
     public Event() {
         this.members = new ArrayList<>();
         this.interesteds = new ArrayList<>();
-        eventType = EventTypes.OTHERS;
+        this.eventType = EventTypes.OTHERS;
 //        privacyType = PrivacyTypes.PUBLIC;
     }
 
@@ -124,9 +130,11 @@ public class Event {
      * @param otherEvent data transformed as user from app
      */
     public void mergeDataFromOtherInstance(Event otherEvent) {
-        this.text = otherEvent.getText();
+        this.name = otherEvent.getName();
         this.description = otherEvent.getDescription();
         this.eventType = otherEvent.getEventType();
+        this.meetingpoint = otherEvent.getMeetingpoint();
+        this.date = otherEvent.getDate();
 //        this.privacyType = otherEvent.getPrivacyType();
 //        this.maxParticipants = otherEvent.getMaxParticipants();
     }
@@ -152,12 +160,12 @@ public class Event {
         this.id = id;
     }
 
-    public String getText() {
-        return text;
+    public String getName() {
+        return name;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setName(String text) {
+        this.name = text;
     }
 
     public Location getLocation() {
@@ -185,6 +193,14 @@ public class Event {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getMeetingpoint() {
+        return meetingpoint;
+    }
+
+    public void setMeetingpoint(String meetingpoint) {
+        this.meetingpoint = meetingpoint;
     }
 
     public User getOwner() {

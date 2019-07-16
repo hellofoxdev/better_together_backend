@@ -19,7 +19,7 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 //    List<Event> findByLocation(Location location);
 
     Event findById(UUID id);
-    List<Event> findAllByPrivacyType(PrivacyTypes privacyType);
+//    List<Event> findAllByPrivacyType(PrivacyTypes privacyType);
     List<Event> findAllByDeletedIsFalse();
     List<Event> findAllByDeletedIsFalseAndOpenIsTrue();
 }
