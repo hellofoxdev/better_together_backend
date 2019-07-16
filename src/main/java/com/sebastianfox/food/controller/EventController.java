@@ -322,6 +322,14 @@ public class EventController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     *
+     * @param key for Response HashMap
+     * @param value for Repsonse HashMao
+     * @return String with ResponseJSON
+     * @throws JSONException exceptionhandling
+     * @throws JsonProcessingException exceptionhandling
+     */
     private String createResposneJson(String key, Object value) throws JSONException, JsonProcessingException {
         HashMap<String,Object> responseHash = new HashMap<>();
         responseHash.put(key, value);

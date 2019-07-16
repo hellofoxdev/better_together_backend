@@ -1,5 +1,6 @@
 package com.sebastianfox.food.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebastianfox.food.models.*;
 import com.sebastianfox.food.repository.Event.EventRepository;
@@ -53,30 +54,19 @@ public class UserController {
     public ResponseEntity<Object> findByUsername(@RequestBody HashMap<String, String> data)
             throws JSONException, IOException {
 
-        // create hashmap for response
-        HashMap<String, Object> responseHash = new HashMap<>();
-
         // get username from request
         String requestedUserName = data.get("userName");
 
         // check if username belongs to an existing user
         if (this.isUserNameAvailable(requestedUserName)){
-
-            // no user with requested name found, return back to app
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
         // Select user from database
         User requestedUser = this.findByUserName(requestedUserName);
 
-        // collect/prepare response data
-        responseHash.put("user", requestedUser);
-
-        // object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
-
         // Return to app
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", requestedUser), HttpStatus.OK);
     }
 
     /**
@@ -89,30 +79,19 @@ public class UserController {
     public ResponseEntity<Object> findByMail(@RequestBody HashMap<String, String> data)
             throws JSONException, IOException {
 
-        // create hashmap for response
-        HashMap<String, Object> responseHash = new HashMap<>();
-
         // get email from request
         String requestedEmail = data.get("email");
 
         // check if username belongs to an existing user
         if (this.isEmailAvailable(requestedEmail)){
-
-            // no user with requested name found, return back to app
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         // Select user from database
         User requestedUser = this.findByEmail(requestedEmail);
 
-        // collect/prepare response data
-        responseHash.put("user", requestedUser);
-
-        // object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
-
         // Return to app
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", requestedUser), HttpStatus.OK);
     }
 
     /**
@@ -131,28 +110,21 @@ public class UserController {
         String email = (String) registerData.get("email");
         String password = (String) registerData.get("password");
 
-        HashMap<String, Object> responseHash = new HashMap<>();
-
         // Check availability of Username
         if (userRepository.findByUserName(username) != null) {
-            // Object to JSON String
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
         // Check availability of Email
         if (userRepository.findByEmail(email) != null) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
         User user = userService.createUser(username, email, password);
         userRepository.save(user);
 
-        // Successful register
-        responseHash.put("user", user);
-        // Object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(responseJson, HttpStatus.CREATED);
+        return new ResponseEntity<>(createResposneJson("user", user), HttpStatus.CREATED);
     }
 
     /**
@@ -168,22 +140,13 @@ public class UserController {
         User user = userRepository.findByEmail(data.get("email"));
         String password = data.get("password");
 
-        HashMap<String, Object> responseHash = new HashMap<>();
-
         // Failure at login (user not found or bad credentials)
         if (user == null || !authenticator.isExpectedPassword(password.toCharArray(), user.getSalt(), user.getPassword())) {
-            // Object  to JSON String
-            String jsonString = mapper.writeValueAsString(responseHash);
-            // Return to App
-            return new ResponseEntity<>(jsonString, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        // Successful login
-        responseHash.put("user", user);
-        // Object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", user), HttpStatus.OK);
     }
 
     /**
@@ -197,7 +160,6 @@ public class UserController {
     public ResponseEntity<Object> authenticateWithFacebook(@RequestBody HashMap<String, Object> data)
             throws JSONException, IOException {
 
-        HashMap<String, Object> responseHash = new HashMap<>();
         User requestedUser = (User) data.get("user");
         User facebookUser = userRepository.findByFacebookAccountId(requestedUser.getFacebookAccountId());
 
@@ -210,20 +172,12 @@ public class UserController {
                 invitation.setInvited(requestedUser);
                 invitationRepository.save(invitation);
             }
-
-
-            responseHash.put("user", requestedUser);
-            // Object to JSON String
-            String responseJson = mapper.writeValueAsString(responseHash);
-            return new ResponseEntity<>(responseJson, HttpStatus.CREATED);
+            return new ResponseEntity<>(createResposneJson("user", requestedUser), HttpStatus.CREATED);
         }
 
-        // User already exists and is foud in database
-        responseHash.put("user", facebookUser);
-        // Object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
+        // User already exists and is found in database
         // Return to App
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", facebookUser), HttpStatus.OK);
     }
 
     /**
@@ -237,17 +191,13 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@RequestBody HashMap<String, User> data)
             throws JSONException, IOException {
 
-        HashMap<String, Object> responseHash = new HashMap<>();
-
         // Determine user from app request
         User appUser = data.get("user");
 
         // Fail
         if (appUser == null || appUser.getId() == null) {
-            // Object to JSON String
-            String jsonString = mapper.writeValueAsString(responseHash);
             // Return to App
-            return new ResponseEntity<>(jsonString, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // Load user from database
@@ -255,22 +205,16 @@ public class UserController {
 
         // Fail
         if (dbUser == null) {
-            // Object to JSON String
-            String jsonString = mapper.writeValueAsString(responseHash);
             // Return to App
-            return new ResponseEntity<>(jsonString, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         // Merge data from app user into db user
         dbUser.mergeDataFromOtherInstance(appUser);
         userRepository.save(dbUser);
 
-        // Successful register
-        responseHash.put("user", dbUser);
-        // Object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", dbUser), HttpStatus.OK);
     }
 
     /**
@@ -284,23 +228,16 @@ public class UserController {
     public ResponseEntity<Object> reloadUser(@RequestBody HashMap<String, UUID> data)
             throws JSONException, IOException {
 
-        HashMap<String, Object> responseHash = new HashMap<>();
         User user = userRepository.findById(data.get("id"));
 
         // Fail
         if (user == null) {
-            // Object to JSON String
-            String jsonString = mapper.writeValueAsString(responseHash);
             // Return to App
-            return new ResponseEntity<>(jsonString, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // Success
-        responseHash.put("user", user);
-        // Object to JSON String
-        String responseJson = mapper.writeValueAsString(responseHash);
         // Return to App
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
+        return new ResponseEntity<>(createResposneJson("user", user), HttpStatus.OK);
     }
 
     /**
@@ -316,12 +253,12 @@ public class UserController {
         // Username already exist
         // Return to App
         if (this.isUserNameAvailable(registerData.get("username"))) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
         // Username is available
         // Return to App
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -337,12 +274,12 @@ public class UserController {
         // Email already exist
         // Return to App
         if (this.isEmailAvailable(registerData.get("email"))) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
         // Username is available
         // Return to App
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 //    /*
@@ -468,9 +405,6 @@ public class UserController {
     public ResponseEntity<Object> updateUserEmail(@RequestBody HashMap<String,HashMap> data)
             throws JSONException, IOException {
 
-        // create hashmap for response
-        HashMap<String, Object> responseHash = new HashMap<>();
-
         // exclude data from hashmap
         HashMap dataHashMap = data.get("data");
 
@@ -492,24 +426,12 @@ public class UserController {
             // sace user
             userRepository.save(dbUser);
 
-            // collect/prepare response data (return user with current friendships)
-            responseHash.put("user", dbUser);
-
-            // Object to JSON String
-            String jsonString = mapper.writeValueAsString(responseHash);
-
             // Return to app (successful)
-            return new ResponseEntity<>(jsonString, HttpStatus.OK);
+            return new ResponseEntity<>(createResposneJson("user", dbUser), HttpStatus.OK);
         }
 
-        // Object to JSON String
-        responseHash.put("user", dbUser);
-
-        // Object to JSON String
-        String jsonString = mapper.writeValueAsString(responseHash);
-
         // Return to app (not successful)
-        return new ResponseEntity<>(jsonString, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(createResposneJson("user", dbUser), HttpStatus.CONFLICT);
     }
 
     /**
@@ -577,7 +499,20 @@ public class UserController {
         for (Event event : events) {
             System.out.println(event.getId().toString());
         }
+    }
 
-
+    /**
+     *
+     * @param key for Response HashMap
+     * @param value for Repsonse HashMao
+     * @return String with ResponseJSON
+     * @throws JSONException exceptionhandling
+     * @throws JsonProcessingException exceptionhandling
+     */
+    @SuppressWarnings("SameParameterValue")
+    private String createResposneJson(String key, Object value) throws JSONException, JsonProcessingException {
+        HashMap<String,Object> responseHash = new HashMap<>();
+        responseHash.put(key, value);
+        return mapper.writeValueAsString(responseHash);
     }
 }
