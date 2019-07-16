@@ -20,16 +20,14 @@ public class Friendship {
     @Column(columnDefinition = "BINARY(16)", name = "friendship_id")
     private UUID id;
 
-    @ManyToOne()
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "friend1_id", nullable=false)
-//    @JsonIgnoreProperties({ "friend1", "friend2", "friendships1", "friendships2", "events", "ownedEvents" })
     @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     @JsonBackReference(value="friend1")
     private User friend1;
 
-    @ManyToOne()
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "friend2_id", nullable=false)
-//    @JsonIgnoreProperties({ "friend1", "friend2", "friendships1", "friendships2", "events", "ownedEvents" })
     @JsonIgnoreProperties({"userName", "email", "name", "description", "facebookAccountId", "facebookAccountEmail", "facebookAccountUserName", "facebookAccount", "events", "ownedEvents", "interestedEvents", "friendshipsFriend1", "friendshipsFriend2", "acceptedFriends", "requestedFriendsByFriend", "requestedFriendsByCurrentUser"})
     @JsonBackReference(value="friend2")
     private User friend2;
@@ -70,7 +68,7 @@ public class Friendship {
         this.id = id;
     }
 
-    User getFriend1() {
+    public User getFriend1() {
         return friend1;
     }
 
@@ -81,7 +79,7 @@ public class Friendship {
         }
     }
 
-    User getFriend2() {
+    public User getFriend2() {
         return friend2;
     }
 
